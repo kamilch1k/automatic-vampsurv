@@ -796,7 +796,7 @@ function drawProp(p){
   const def=PROP[p.type];if(!def)return;const a=def.art,sc=def.sc,dw=a.w*sc,dh=a.h*sc;
   const fy=def.float?p.y-46:p.y;
   if(!def.float){ctx.save();ctx.globalAlpha=.32;ctx.fillStyle="#000";ctx.beginPath();ctx.ellipse(p.x,p.y-2,dw*0.42,dw*0.16,0,0,TAU);ctx.fill();ctx.restore();}
-  if(def.glow){const cy=fy-dh*0.55,r=dw*0.95;const gg=ctx.createRadialGradient(p.x,cy,1,p.x,cy,r);gg.addColorStop(0,def.glow);gg.addColorStop(1,"rgba(0,0,0,0)");ctx.fillStyle=gg;ctx.beginPath();ctx.arc(p.x,cy,r,0,TAU);ctx.fill();}
+  if(def.glow){const cy=fy-dh*0.55,r=dw*0.9;drawGlow(p.x,cy,r,parseRGB(def.glow),0.5,3);}
   ctx.imageSmoothingEnabled=false;ctx.drawImage(a.cv,Math.round(p.x-dw/2),Math.round(fy-dh),dw,dh);
 }
 /* ---- per-biome enemy tint ---- */
@@ -838,14 +838,15 @@ const SHRINE={
 function drawSprR(a,x,y,sc,ang,al){if(!a)return;const w=a.w*sc,h=a.h*sc;ctx.save();ctx.translate(x,y);if(ang)ctx.rotate(ang);if(al!=null)ctx.globalAlpha=al;ctx.imageSmoothingEnabled=false;ctx.drawImage(a.cv,-w/2,-h/2,w,h);ctx.restore();ctx.globalAlpha=1;}
 /* ---- chunky pixel-art glow (ordered-dither radial, baked once per color) ---- */
 const glowCache={};
-function glowTex(r,g,b){const k=r+","+g+","+b;if(glowCache[k])return glowCache[k];
-  // low-res clean stepped radial -> chunky concentric pixel rings when scaled up
-  const S=14,STEPS=4,cv=document.createElement("canvas");cv.width=cv.height=S;const x=cv.getContext("2d");const c=(S-1)/2;
+function parseRGB(s){if(!s)return [255,255,255];if(s.charAt(0)==='#'){const n=parseInt(s.slice(1,7),16);return [(n>>16)&255,(n>>8)&255,n&255];}const m=s.match(/(\d+)[,\s]+(\d+)[,\s]+(\d+)/);return m?[+m[1],+m[2],+m[3]]:[255,255,255];}
+function glowTex(r,g,b,S){const k=r+","+g+","+b+","+S;if(glowCache[k])return glowCache[k];
+  // stepped radial baked at resolution S; drawn pixelated -> small uniform pixel texels
+  const STEPS=Math.max(3,Math.min(8,(S/3)|0)),cv=document.createElement("canvas");cv.width=cv.height=S;const x=cv.getContext("2d");const c=(S-1)/2;
   for(let yy=0;yy<S;yy++)for(let xx=0;xx<S;xx++){const d=Math.hypot(xx-c,yy-c)/(S/2);if(d>1)continue;
     const lvl=Math.ceil((1-d)*STEPS)/STEPS;if(lvl<=0)continue;
     x.fillStyle="rgba("+r+","+g+","+b+","+lvl.toFixed(3)+")";x.fillRect(xx,yy,1,1);}
   glowCache[k]=cv;return cv;}
-function drawGlow(cx,cy,rad,col,al){const tex=glowTex(col[0],col[1],col[2]);ctx.save();ctx.globalAlpha=al;ctx.imageSmoothingEnabled=false;ctx.drawImage(tex,Math.round(cx-rad),Math.round(cy-rad),Math.round(rad*2),Math.round(rad*2));ctx.restore();}
+function drawGlow(cx,cy,rad,col,al,pix){pix=pix||4;let S=Math.round(rad*2/pix);if(S<6)S=6;if(S>72)S=72;const tex=glowTex(col[0],col[1],col[2],S);ctx.save();ctx.globalAlpha=al;ctx.imageSmoothingEnabled=false;ctx.drawImage(tex,Math.round(cx-rad),Math.round(cy-rad),Math.round(rad*2),Math.round(rad*2));ctx.restore();}
 const CICON={
   axe:bakeArt(["..............",".....ZZZZ.....","....ZZZZZZ....","....ZZZZZZo...","....zZZZZoo...",".....zzooo....","......too.....","......to......","......to......","......oo......",".............."]),
   knife:bakeArt(["..Z........Z..","..Zz......zZ..","...Zz....zZ...","....Zz..zZ....",".....BzzB.....",".....zBBz.....","....oz..zo....","...o......o...","..o........o.."]),
@@ -1250,7 +1251,7 @@ function render(){
   if(hero){const amb=ctx.createRadialGradient(hero.x,hero.y,40,hero.x,hero.y,540);amb.addColorStop(0,bm.amb);amb.addColorStop(1,"rgba(8,6,4,0)");ctx.fillStyle=amb;ctx.fillRect(cam.x,cam.y,W,Hh);}
   for(const o of obstacles)drawProp(o);
   for(const b of beacons){const T=BTYPES[b.type];const tgt=run&&run.target===b;const bob=Math.sin(b.pulse)*3;
-    const gl=ctx.createRadialGradient(b.x,b.y-10,2,b.x,b.y-10,44);gl.addColorStop(0,T.col+"66");gl.addColorStop(1,T.col+"00");ctx.fillStyle=gl;ctx.beginPath();ctx.arc(b.x,b.y-10,44,0,TAU);ctx.fill();
+    drawGlow(b.x,b.y-10,42,parseRGB(T.col),0.5,3);
     const a=SHRINE[b.type]||SHRINE.cache,sc=2,dw=a.w*sc,dh=a.h*sc;
     ctx.save();ctx.globalAlpha=.3;ctx.fillStyle="#000";ctx.beginPath();ctx.ellipse(b.x,b.y,dw*0.42,dw*0.16,0,0,TAU);ctx.fill();ctx.restore();
     ctx.imageSmoothingEnabled=false;ctx.drawImage(a.cv,Math.round(b.x-dw/2),Math.round(b.y-dh+bob),dw,dh);
