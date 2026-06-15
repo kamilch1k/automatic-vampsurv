@@ -249,6 +249,7 @@
   @keyframes casCellJitter{from{transform:translateY(0)}to{transform:translateY(1px)}}
   #app.shot #side,#app.shot #hud,#app.shot #bars,#app.shot #pauseBtn,#app.shot #cornerBtns,#app.shot #toast,#app.shot #casino,#app.shot #death,#app.shot .screen,#app.shot .title-badge{display:none !important;}
   #app.shot #stage{flex:1 1 100% !important;cursor:crosshair;}
+  #app.wallpaper #stage{cursor:none;}
   /* ===================== Y2K CHUNK PASS — flat, blocky, no smooth fills ===================== */
   :root{--ol:#000;--bev1:rgba(255,236,200,.22);--bev2:rgba(0,0,0,.62);}
   body{background:#0c0a07;}
@@ -539,6 +540,7 @@
           <button class="sbtn toggle" id="pMusic">Music On</button>
           <button class="sbtn toggle" id="pSfx">SFX On</button>
           <button class="sbtn toggle wide" id="pProgress">Right Panel On</button>
+          <button class="sbtn toggle wide" id="pWallpaper">Desktop Wallpaper</button>
         </div>
       </div>
       <div class="screenFoot">The shop on the right stays open while paused.</div>
@@ -2128,17 +2130,44 @@ const AUDIO=(function(){
 })();
 
 const modal=$("#modal");
+const URL_PARAMS=new URLSearchParams(location.search);
+const WALLPAPER_MODE=URL_PARAMS.get("wallpaper")==="1"||URL_PARAMS.get("mode")==="wallpaper";
 function openModal(title,text,action){$("#modalTitle").textContent=title;$("#modalText").value=text;$("#modalAction").textContent=action;modal.style.display="flex";}
 $("#modalClose").onclick=()=>modal.style.display="none";
-$("#saveBtn").onclick=()=>{G.lastActive=Date.now();const code=btoa(unescape(encodeURIComponent(JSON.stringify(G))));openModal("Save code — copy & keep it",code,"Copy");$("#modalAction").onclick=()=>{$("#modalText").select();try{document.execCommand("copy");}catch(_){}$("#modalAction").textContent="Copied!";};};
-$("#loadBtn").onclick=()=>{openModal("Paste a save code, then Load","","Load");$("#modalAction").onclick=()=>{try{const o=JSON.parse(decodeURIComponent(escape(atob($("#modalText").value.trim()))));G=Object.assign(fresh(),o);G.m=Object.assign(fresh().m,o.m||{});G.s=Object.assign(fresh().s,o.s||{});G.best=Object.assign(fresh().best,o.best||{});G.unlocks=Object.assign(fresh().unlocks,o.unlocks||{});G.mapUnlocks=Object.assign(fresh().mapUnlocks,o.mapUnlocks||{});G.lt=Object.assign(fresh().lt,o.lt||{});G.missions=Object.assign({},o.missions||{});checkUnlocks();checkMissions();if(!G.unlocks[G.char])G.char="knight";if(!G.mapUnlocks[G.map])G.map="dungeon";curChar=CHARS.find(c=>c.id===G.char)||CHARS[0];const sec=(Date.now()-(o.lastActive||Date.now()))/1000;modal.style.display="none";buildForge();buildSoulPane();buildQuests();buildCharCards();applyAudioSettings();beginGame(G.char,G.map);if(sec>30)grantAway(sec);}catch(err){$("#modalAction").textContent="Invalid code";}};};
+function encodeSave(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o))));}
+function decodeSave(code){return JSON.parse(decodeURIComponent(escape(atob((code||"").trim()))));}
+function applySaveObject(o){
+  o=o||{};
+  G=Object.assign(fresh(),o);
+  G.m=Object.assign(fresh().m,o.m||{});G.s=Object.assign(fresh().s,o.s||{});G.best=Object.assign(fresh().best,o.best||{});
+  G.unlocks=Object.assign(fresh().unlocks,o.unlocks||{});G.mapUnlocks=Object.assign(fresh().mapUnlocks,o.mapUnlocks||{});
+  G.lt=Object.assign(fresh().lt,o.lt||{});G.missions=Object.assign({},o.missions||{});
+  checkUnlocks();checkMissions();if(!G.unlocks[G.char])G.char="knight";if(!G.mapUnlocks[G.map])G.map="dungeon";
+  curChar=CHARS.find(c=>c.id===G.char)||CHARS[0];
+  return (Date.now()-(o.lastActive||Date.now()))/1000;
+}
+function currentSaveCode(){G.lastActive=Date.now();return encodeSave(G);}
+function copyModalText(done){$("#modalText").select();try{document.execCommand("copy");}catch(_){}$("#modalAction").textContent=done||"Copied!";}
+function wallpaperUrl(){
+  const u=new URL(location.href);u.searchParams.set("wallpaper","1");u.searchParams.set("save",currentSaveCode());u.hash="";
+  return u.toString();
+}
+function showWallpaperModal(){
+  const url=wallpaperUrl();
+  openModal("Desktop wallpaper mode","Browsers cannot set the Windows desktop background directly. Use this URL in a PC live wallpaper tool like Lively Wallpaper, or in a small desktop wrapper. It launches the game with UI hidden, sound off, and progression still running.\n\n"+url,"Copy URL");
+  $("#modalAction").onclick=()=>copyModalText("URL copied!");
+}
+$("#saveBtn").onclick=()=>{const code=currentSaveCode();openModal("Save code — copy & keep it",code,"Copy");$("#modalAction").onclick=()=>copyModalText("Copied!");};
+$("#loadBtn").onclick=()=>{openModal("Paste a save code, then Load","","Load");$("#modalAction").onclick=()=>{try{const o=decodeSave($("#modalText").value);const sec=applySaveObject(o);modal.style.display="none";buildForge();buildSoulPane();buildQuests();buildCharCards();applyAudioSettings();beginGame(G.char,G.map);if(sec>30)grantAway(sec);}catch(err){$("#modalAction").textContent="Invalid code";}};};
 
-let scene='menu',paused=false,screenshotMode=false;
+let scene='menu',paused=false,screenshotMode=false,wallpaperMode=false;
 function hideScreens(){$('#mainMenu').style.display='none';$('#charSelect').style.display='none';$('#realmSelect').style.display='none';$('#pauseMenu').style.display='none';$('#creditsScreen').style.display='none';}
 function setPanels(on){$('#side').style.display=(on&&!G.hideProgress)?'flex':'none';$('#hud').style.display=on?'flex':'none';$('#bars').style.display=on?'block':'none';$('#pauseBtn').style.display=on?'flex':'none';$('#cornerBtns').style.display=on?'none':'flex';const tb=document.querySelector('.title-badge');if(tb)tb.style.display=on?'block':'none';resize();}
 function centerCameraNow(){if(hero){cam.x=hero.x-W/2;cam.y=hero.y-Hh/2;}}
-function enterScreenshotMode(){if(scene!=='play'||!run||!run.alive)return;screenshotMode=true;paused=false;hideScreens();modal.style.display='none';$('#death').style.display='none';$('#app').classList.add('shot');const c=$("#casino");if(c)c.classList.remove("show");resize();centerCameraNow();}
-function exitScreenshotMode(){if(!screenshotMode)return;screenshotMode=false;$('#app').classList.remove('shot');if(scene==='play')setPanels(true);resize();centerCameraNow();}
+function enterCleanView(asWallpaper){if(scene!=='play'||!run||!run.alive)return;screenshotMode=true;wallpaperMode=!!asWallpaper;paused=false;hideScreens();modal.style.display='none';$('#death').style.display='none';$('#app').classList.add('shot');$('#app').classList.toggle('wallpaper',wallpaperMode);const c=$("#casino");if(c)c.classList.remove("show");resize();centerCameraNow();}
+function enterScreenshotMode(){enterCleanView(false);}
+function enterWallpaperMode(){if(scene!=='play'||!run||!run.alive)beginGame(G.char,G.map);enterCleanView(true);}
+function exitScreenshotMode(){if(!screenshotMode)return;screenshotMode=false;wallpaperMode=false;$('#app').classList.remove('shot','wallpaper');if(scene==='play')setPanels(true);resize();centerCameraNow();}
 function showCredits(){hideScreens();$('#death').style.display='none';$('#cornerBtns').style.display='none';$('#creditsScreen').style.display='flex';}
 function applyAudioSettings(){AUDIO.setEnabled(!G.muted);AUDIO.setMusic(!G.musicMuted);AUDIO.setSfx(!G.sfxMuted);updateSoundBtn();updateAudioSettingsUI();}
 function updateSoundBtn(){const b=$('#soundBtn');if(!b)return;b.innerHTML=AUDIO.isOn()?'&#9834;':'&#9651;';b.classList.toggle('off',!AUDIO.isOn());}
@@ -2175,6 +2204,7 @@ $('#pShot').onclick=function(){enterScreenshotMode();};
 $('#pMusic').onclick=function(){AUDIO.start();G.musicMuted=!G.musicMuted;if(!G.musicMuted)G.muted=false;applyAudioSettings();};
 $('#pSfx').onclick=function(){AUDIO.start();G.sfxMuted=!G.sfxMuted;if(!G.sfxMuted)G.muted=false;applyAudioSettings();};
 $('#pProgress').onclick=function(){G.hideProgress=!G.hideProgress;setPanels(scene==='play'&&!screenshotMode);updateAudioSettingsUI();};
+$('#pWallpaper').onclick=function(){showWallpaperModal();};
 $('#pRestart').onclick=function(){paused=false;$('#pauseMenu').style.display='none';startRun(curChar.id);};
 $('#pMenu').onclick=function(){showMenu();};
 $('#pauseBtn').onclick=function(){togglePause();};
@@ -2183,7 +2213,7 @@ $('#creditsBtn').onclick=showCredits;
 $('#crBack').onclick=showMenu;
 $('#soundBtn').onclick=function(){AUDIO.start();G.muted=!G.muted;applyAudioSettings();};
 function startAudioOnce(){AUDIO.start();window.removeEventListener('pointerdown',startAudioOnce);window.removeEventListener('keydown',startAudioOnce);}
-$('#stage').addEventListener('pointerdown',function(e){if(screenshotMode&&e.button===0){e.preventDefault();e.stopPropagation();exitScreenshotMode();}},true);
+$('#stage').addEventListener('pointerdown',function(e){if(screenshotMode&&!wallpaperMode&&e.button===0){e.preventDefault();e.stopPropagation();exitScreenshotMode();}},true);
 window.addEventListener('pointerdown',startAudioOnce);window.addEventListener('keydown',startAudioOnce);
 function setManualKey(e,on){const k=(e.key||'').toLowerCase();if(!MOVE_KEY_SET.has(k)||(on&&isTypingTarget()))return false;moveKeys[k]=on;e.preventDefault();return true;}
 const MOVE_KEY_SET=new Set(["w","a","s","d","arrowup","arrowdown","arrowleft","arrowright"]);
@@ -2191,7 +2221,12 @@ window.addEventListener('keydown',function(e){setManualKey(e,true);});
 window.addEventListener('keyup',function(e){setManualKey(e,false);});
 window.addEventListener('blur',function(){for(const k in moveKeys)delete moveKeys[k];});
 window.addEventListener('keydown',function(e){const k=(e.key||'').toLowerCase();if(e.key==='Escape'||k==='p'){if(scene==='play')togglePause();else if($('#creditsScreen').style.display==='flex')showMenu();else if($('#realmSelect').style.display==='flex')showSelect();else if(scene==='select')showMenu();}});
-G=fresh();resize();window.addEventListener("resize",resize);checkUnlocks();checkMissions();applyAudioSettings();buildForge();buildSoulPane();buildQuests();buildCharCards();startRun();requestAnimationFrame(loop);showMenu();
+G=fresh();
+if(WALLPAPER_MODE&&URL_PARAMS.get("save")){try{applySaveObject(decodeSave(URL_PARAMS.get("save")));}catch(_){}}
+if(WALLPAPER_MODE){G.muted=true;G.musicMuted=true;G.sfxMuted=true;}
+resize();window.addEventListener("resize",resize);checkUnlocks();checkMissions();applyAudioSettings();buildForge();buildSoulPane();buildQuests();buildCharCards();
+if(WALLPAPER_MODE){beginGame(G.char,G.map);enterWallpaperMode();}else{startRun();showMenu();}
+requestAnimationFrame(loop);
 })();
 </script>
 </body>
