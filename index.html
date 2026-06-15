@@ -994,8 +994,7 @@ function startRun(charId,mapId){
        b:{orbDps:1,boltDmg:1,fire:1,nova:1,extraOrb:0,chain:1,aura:1,wisp:1,axe:0,knife:0,water:0,storm:0}};
   for(let i=1;i<startLevel();i++)applyLevelGain(true);
   hero={x:WORLD.w/2,y:WORLD.h/2,hp:maxHpV(),max:maxHpV(),vx:0,vy:0,hurt:0};
-  if(curMap.openCam){cam.x=hero.x-W/2;cam.y=hero.y-Hh/2;}
-  else{cam.x=clamp(hero.x-W/2,0,Math.max(0,WORLD.w-W));cam.y=clamp(hero.y-Hh/2,0,Math.max(0,WORLD.h-Hh));}
+  cam.x=hero.x-W/2;cam.y=hero.y-Hh/2;
   genObstacles();
   enemies.length=gems.length=bolts.length=wisps.length=novas.length=lightning.length=parts.length=pops.length=0;
   axes.length=knives.length=pools.length=strikes.length=0;
@@ -1146,9 +1145,7 @@ function update(dt){
   hero.x+=hero.vx*dt;hero.y+=hero.vy*dt;clampToRegion(hero,14);
   pushOut(hero,11);
   for(let i=0;i<beacons.length;i++){if(dist(beacons[i],hero)<26)activateBeacon(beacons[i],i);}
-  let tcx,tcy;
-  if(curMap&&curMap.openCam){tcx=hero.x-W/2;tcy=hero.y-Hh/2;}
-  else{tcx=clamp(hero.x-W/2,0,Math.max(0,WORLD.w-W));tcy=clamp(hero.y-Hh/2,0,Math.max(0,WORLD.h-Hh));}
+  const tcx=hero.x-W/2,tcy=hero.y-Hh/2; // always keep the hero centered so the HUD never covers it
   cam.x+=(tcx-cam.x)*Math.min(dt*4,1);cam.y+=(tcy-cam.y)*Math.min(dt*4,1);
   run.spawnAcc+=dt;
   const spawnInt=Math.max(0.07,0.62-run.time*0.013);
