@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>REVENANT</title>
+<title>Incremental Survivors</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
@@ -452,7 +452,7 @@
 <div id="app">
   <div id="stage">
     <canvas id="scene"></canvas>
-    <div class="title-badge"><h1>REVENANT</h1><div class="sub">the dead knight marches</div></div>
+    <div class="title-badge"><h1>INCREMENTAL SURVIVORS</h1><div class="sub">the dead knight marches</div></div>
     <div id="hud">
       <div class="chip wave"><div class="k">Wave</div><div class="v" id="hWave">1</div></div>
       <div class="chip"><div class="k">Survived</div><div class="v" id="hTime">0s</div></div>
@@ -484,7 +484,7 @@
     <div id="casino"><div class="casBox"><div class="casTtl">&#10022; RELIC FORTUNE &#10022;</div><div class="casWin"><div class="casReel" id="casReel"></div><div class="casMark"></div></div><div class="casRes" id="casRes"></div></div></div>
     <div id="mainMenu" class="screen">
       <div class="crest">&#9769;</div>
-      <h2 class="screenTitle">REVENANT</h2>
+      <h2 class="screenTitle">INCREMENTAL SURVIVORS</h2>
       <div class="screenSub">an undying knight &middot; an endless horde</div>
       <div class="menuBtns">
         <button class="sbtn primary" id="mPlay">Enter the Field</button>
@@ -522,7 +522,7 @@
         <div class="cgrp">Music &amp; Sound</div>
         <p>Procedural — synthesized live in your browser with the <b>Web Audio API</b>. No external files.</p>
         <div class="cgrp">Game</div>
-        <p><b>REVENANT</b> — an automatic survivors prototype.</p>
+        <p><b>Incremental Survivors</b> — an automatic survivors game.</p>
       </div>
       <button class="sbtn ghost" id="crBack">Back</button>
     </div>
@@ -1479,7 +1479,7 @@ $("#loadBtn").onclick=()=>{openModal("Paste a save code, then Load","","Load");$
 
 let scene='menu',paused=false;
 function hideScreens(){$('#mainMenu').style.display='none';$('#charSelect').style.display='none';$('#realmSelect').style.display='none';$('#pauseMenu').style.display='none';$('#creditsScreen').style.display='none';}
-function setPanels(on){$('#side').style.display=on?'flex':'none';$('#hud').style.display=on?'flex':'none';$('#bars').style.display=on?'block':'none';$('#pauseBtn').style.display=on?'flex':'none';$('#cornerBtns').style.display=on?'none':'flex';const tb=document.querySelector('.title-badge');if(tb)tb.style.display=on?'block':'none';}
+function setPanels(on){$('#side').style.display=on?'flex':'none';$('#hud').style.display=on?'flex':'none';$('#bars').style.display=on?'block':'none';$('#pauseBtn').style.display=on?'flex':'none';$('#cornerBtns').style.display=on?'none':'flex';const tb=document.querySelector('.title-badge');if(tb)tb.style.display=on?'block':'none';resize();}
 function showCredits(){hideScreens();$('#death').style.display='none';$('#cornerBtns').style.display='none';$('#creditsScreen').style.display='flex';}
 function updateSoundBtn(){const b=$('#soundBtn');if(!b)return;b.innerHTML=AUDIO.isOn()?'&#9834;':'&#9651;';b.classList.toggle('off',!AUDIO.isOn());}
 function showMenu(){scene='menu';paused=false;hideScreens();$('#death').style.display='none';setPanels(false);const nch=Object.values(G.unlocks).filter(Boolean).length,nmp=Object.values(G.mapUnlocks||{}).filter(Boolean).length;$('#mFoot').textContent='Souls '+G.soul+'  ·  Champions '+nch+'/'+CHARS.length+'  ·  Realms '+nmp+'/'+MAPS.length;$('#mainMenu').style.display='flex';}
