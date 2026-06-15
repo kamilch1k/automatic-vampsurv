@@ -1403,7 +1403,7 @@ function startRun(charId,mapId){
        b:{orbDps:1,boltDmg:1,fire:1,nova:1,extraOrb:0,chain:1,aura:1,wisp:1,axe:0,knife:0,water:0,storm:0,spike:0,pigeon:0,dash:0,longdash:0,void:0,briar:0,vial:0,frost:0,lance:0,bone:0,rune:0,ember:0,shadow:0,crystal:0,toxin:0,star:0,bell:0,clock:0,prism:0,boom:0,ghostknight:0,boneguard:0,pixie:0}};
   for(let i=1;i<startLevel();i++)applyLevelGain(true);
   const startPos=hasGridWalls()?gridCellPoint((RC/2)|0,(RR/2)|0):{x:WORLD.w/2,y:WORLD.h/2};
-  hero={x:startPos.x,y:startPos.y,hp:maxHpV(),max:maxHpV(),vx:0,vy:0,hurt:0,dashT:0,dashVx:0,dashVy:0,dashHit:new Set(),longT:0,longVx:0,longVy:0};
+  hero={x:startPos.x,y:startPos.y,hp:maxHpV(),max:maxHpV(),vx:0,vy:0,face:1,walkT:0,moving:false,lastX:startPos.x,lastY:startPos.y,hurt:0,dashT:0,dashVx:0,dashVy:0,dashHit:new Set(),longT:0,longVx:0,longVy:0};
   cam.x=hero.x-W/2;cam.y=hero.y-Hh/2;
   genObstacles();
   enemies.length=flybys.length=bossZones.length=gems.length=bolts.length=wisps.length=novas.length=lightning.length=parts.length=pops.length=0;
@@ -1876,6 +1876,19 @@ function manualVector(){
   const l=Math.hypot(x,y);
   return l?{x:x/l,y:y/l}:null;
 }
+function updateHeroMotionState(dt,ix,iy){
+  if(!hero)return;
+  if(hero.face==null)hero.face=1;
+  if(hero.walkT==null)hero.walkT=0;
+  if(hero.lastX==null){hero.lastX=hero.x;hero.lastY=hero.y;}
+  const mx=hero.x-hero.lastX,my=hero.y-hero.lastY,moved=Math.hypot(mx,my),speed=dt>0?moved/dt:0;
+  const faceCue=Math.abs(mx)>0.12?mx:(Math.abs(hero.vx)>7?hero.vx:ix);
+  if(Math.abs(faceCue)>0.08)hero.face=faceCue<0?-1:1;
+  hero.moving=speed>8||Math.hypot(hero.vx||0,hero.vy||0)>22;
+  if(hero.moving)hero.walkT+=Math.min(0.12,dt)*(0.85+Math.min(speed,260)/105);
+  else hero.walkT=0;
+  hero.lastX=hero.x;hero.lastY=hero.y;
+}
 
 let shake=0,t=0,deathTimer=0,hidden=false,hiddenAt=0,toastT=0;
 function loop(now){const dt=Math.min((now-(loop._l||now))/1000,0.05);loop._l=now;t+=dt;
@@ -1890,7 +1903,10 @@ function update(dt){
   hero.max=Math.max(hero.max,maxHpV());
   hero.hp=Math.min(hero.max,hero.hp+regenV()*dt);
   hero.hurt=Math.max(0,hero.hurt-dt);
-  const manual=manualVector();
+  const manual=manualVector(),wasManual=!!run.manualWasActive;
+  run.manualWasActive=!!manual;
+  if(manual&&!wasManual){run.target=null;hero.vx*=0.35;hero.vy*=0.35;}
+  if(!manual&&wasManual){run.target=null;hero.vx*=0.55;hero.vy*=0.55;}
   if(!manual&&(!run.target||!beacons.includes(run.target)))run.target=chooseTargetBeacon();
   let dx=0,dy=0;
   if(manual){
@@ -1919,7 +1935,7 @@ function update(dt){
     hero.vy+=((dy/dl)*sp-hero.vy)*Math.min(dt*6,1);
     moveEntity(hero,hero.vx*dt,hero.vy*dt,14,true);
   }
-  pushOut(hero,12);clampToRegion(hero,14);
+  pushOut(hero,12);clampToRegion(hero,14);updateHeroMotionState(dt,dx/dl,dy/dl);
   for(let i=0;i<beacons.length;i++){if(dist(beacons[i],hero)<26)activateBeacon(beacons[i],i);}
   const tcx=hero.x-W/2,tcy=hero.y-Hh/2; // always keep the hero centered so the HUD never covers it
   cam.x+=(tcx-cam.x)*Math.min(dt*4,1);cam.y+=(tcy-cam.y)*Math.min(dt*4,1);
@@ -2167,7 +2183,8 @@ function render(){
     for(let k=0;k<oN;k++){const a=orbAngle+k/oN*TAU,ox=hero.x+Math.cos(a)*oR,oy=hero.y+Math.sin(a)*oR;drawGlow(ox,oy,14,run.dmgBuff>1?[255,150,90]:[200,236,251],0.26);drawSprR(WSPR.blade,ox,oy,2.2,a+Math.PI/2+orbAngle*2,1);}
     ctx.save();ctx.globalAlpha=.34;ctx.fillStyle="#000";ctx.beginPath();ctx.ellipse(hero.x,hero.y+18,13,5,0,0,TAU);ctx.fill();ctx.restore();
     const hk=HERO_SPR[curChar.id]||"knight";
-    if(!drawSpriteH(hk,hero.x,hero.y-8,44,hero.vx<-4,Math.floor(t*6)%2)){ctx.fillStyle=hero.hurt>0?"#ff9aab":"#fff3d6";ctx.beginPath();ctx.arc(hero.x,hero.y,8,0,TAU);ctx.fill();ctx.strokeStyle="rgba(255,217,138,.9)";ctx.lineWidth=2;ctx.beginPath();ctx.arc(hero.x,hero.y,11,0,TAU);ctx.stroke();}
+    const hFrame=hero.moving?Math.floor(hero.walkT*6)%2:0;
+    if(!drawSpriteH(hk,hero.x,hero.y-8,44,hero.face<0,hFrame)){ctx.fillStyle=hero.hurt>0?"#ff9aab":"#fff3d6";ctx.beginPath();ctx.arc(hero.x,hero.y,8,0,TAU);ctx.fill();ctx.strokeStyle="rgba(255,217,138,.9)";ctx.lineWidth=2;ctx.beginPath();ctx.arc(hero.x,hero.y,11,0,TAU);ctx.stroke();}
   }
   for(const rf of relicFlares){const al=clamp(rf.life/rf.ttl,0,1),spr=CICON[rf.id],rise=(1-al)*18;drawPixelRing(rf.x,rf.y-rise,38,"#ffd24a",al*.72,7,5);drawPixelBurst(rf.x,rf.y-rise,42,["#ffd24a","#fff4c0","#b06adf"],al*.58,5);if(spr)drawSprR(spr,rf.x,rf.y-rise,3.1+Math.sin((1-al)*TAU)*0.25,0,al);ctx.save();ctx.globalAlpha=al;ctx.textAlign="center";ctx.font="18px 'VT323',monospace";ctx.fillStyle="#000";ctx.fillText(rf.nm,rf.x+1,rf.y+35-rise+1);ctx.fillStyle="#ffd24a";ctx.fillText(rf.nm,rf.x,rf.y+35-rise);ctx.restore();}
   for(const p of parts){ctx.globalAlpha=clamp(p.life,0,1);ctx.fillStyle=p.col;const ps=Math.max(1,Math.round(p.r));ctx.fillRect(Math.round(p.x-ps/2),Math.round(p.y-ps/2),ps,ps);}ctx.globalAlpha=1;
@@ -2420,6 +2437,7 @@ function setManualKey(e,on){const k=movementKey(e);if(!MOVE_KEY_SET.has(k)||(on&
 window.addEventListener('keydown',function(e){setManualKey(e,true);},true);
 window.addEventListener('keyup',function(e){setManualKey(e,false);},true);
 window.addEventListener('blur',clearManualKeys);
+document.addEventListener('visibilitychange',function(){if(document.hidden)clearManualKeys();});
 window.addEventListener('keydown',function(e){const k=(e.key||'').toLowerCase();if(e.key==='Escape'||k==='p'){if(scene==='play')togglePause();else if($('#creditsScreen').style.display==='flex')showMenu();else if($('#realmSelect').style.display==='flex')showSelect();else if(scene==='select')showMenu();}});
 G=fresh();
 if(WALLPAPER_MODE&&URL_PARAMS.get("save")){try{applySaveObject(decodeSave(URL_PARAMS.get("save")));}catch(_){}}
