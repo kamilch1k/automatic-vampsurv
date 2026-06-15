@@ -6,15 +6,16 @@
 <title>REVENANT</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#14100c;--bg2:#1b1510;--panel:#1f1813;--panel2:#2a2018;
-    --line:#3a2e22;--line2:#574536;
-    --ink:#ece3d0;--muted:#9c8a70;--muted2:#74654f;
-    --lume:#f0b75a;--lume2:#ffe2a8;--orb:#cfe0ee;--orb2:#9fb8cc;
-    --void:#8fae5b;--void2:#a6d06a;--xp:#9ad06a;--gold:#f0c04a;--gold2:#ffd97a;
-    --hp:#d24b3a;--soul:#b9a3e6;
+    --bg:#0d0e16;--bg2:#141728;--panel:#1c2034;--panel2:#28304a;
+    --line:#000;--line2:#46537e;
+    --ink:#eef1fb;--muted:#9aa3c2;--muted2:#5f6890;
+    --lume:#ffc83a;--lume2:#ffe6a0;--orb:#56d4e6;--orb2:#39a7bd;
+    --void:#76c84a;--void2:#86e05a;--xp:#86e05a;--gold:#ffc83a;--gold2:#ffe6a0;
+    --hp:#f04a5e;--soul:#bb8cff;
+    --blite:rgba(255,255,255,.18);--bdark:rgba(0,0,0,.55);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
@@ -273,6 +274,90 @@
   .casMark{width:58px !important;height:60px !important;border:3px solid var(--lume) !important;
     box-shadow:0 0 0 1px #000,0 0 14px rgba(240,183,90,.8),inset 0 0 10px rgba(240,183,90,.45) !important;}
   .casRes{color:var(--lume2) !important;letter-spacing:.08em !important;text-shadow:1px 1px 0 #000 !important;}
+  /* ============================ RETRO RESKIN (final, wins) ============================ */
+  *{border-radius:0 !important;}
+  body{font-family:'VT323',monospace !important;-webkit-font-smoothing:none !important;background:var(--bg) !important;color:var(--ink) !important;}
+  canvas,img{image-rendering:pixelated !important;}
+  #stage{background:#070810 !important;}
+  /* --- arcade pixel font for chrome/headers/buttons --- */
+  .title-badge h1,.screenTitle,.screenTitle.small,#death .big,
+  .sbtn,.tab,.mini,.cbtn,#death button,#modal button,#modal h3,
+  .grp,.chip .k,.card .cnm,#side header .lab,.cgrp{font-family:'Press Start 2P',monospace !important;}
+  .title-badge h1{font-size:14px !important;letter-spacing:2px !important;color:var(--lume) !important;text-shadow:2px 2px 0 #000 !important;}
+  .title-badge .sub,.screenSub{font-family:'VT323',monospace !important;font-size:15px !important;letter-spacing:3px !important;color:var(--muted) !important;}
+  .screenTitle{font-size:30px !important;letter-spacing:1px !important;color:var(--lume) !important;text-shadow:3px 3px 0 #000 !important;line-height:1.35 !important;}
+  .screenTitle.small{font-size:18px !important;color:var(--ink) !important;}
+  .screen .crest{color:var(--lume) !important;text-shadow:3px 3px 0 #000 !important;}
+  #death .big{font-size:22px !important;color:var(--soul) !important;text-shadow:3px 3px 0 #000 !important;}
+  #death .row .n,#death .gain{font-family:'VT323',monospace !important;font-size:24px !important;text-shadow:2px 2px 0 #000 !important;}
+  .sbtn{font-size:11px !important;letter-spacing:0 !important;line-height:1.5 !important;padding:13px 16px !important;}
+  .tab{font-size:9px !important;letter-spacing:0 !important;}
+  .mini,.cbtn{font-size:8px !important;letter-spacing:0 !important;line-height:1.7 !important;}
+  #death button{font-size:10px !important;letter-spacing:0 !important;}
+  #modal button{font-size:9px !important;}#modal h3{font-size:11px !important;color:var(--lume) !important;}
+  .grp{font-size:8px !important;letter-spacing:1px !important;color:var(--muted) !important;}
+  .chip .k{font-size:7px !important;letter-spacing:0 !important;color:var(--muted) !important;}
+  .card .cnm{font-size:12px !important;color:var(--ink) !important;line-height:1.3 !important;}
+  #side header .lab{font-size:8px !important;color:var(--muted) !important;}
+  .cgrp{font-size:8px !important;color:var(--lume) !important;}
+  /* --- VT323 body sizes (legible pixel font) --- */
+  .chip .v{font-family:'VT323',monospace !important;font-size:24px !important;color:var(--ink) !important;text-shadow:2px 2px 0 #000 !important;}
+  .chip.wave .v{color:var(--orb) !important;}.chip.kills .v{color:var(--void2) !important;}
+  #goldBig{font-family:'VT323',monospace !important;font-size:42px !important;color:var(--gold) !important;text-shadow:2px 2px 0 #000 !important;}
+  #goldRate{font-size:16px !important;color:var(--muted) !important;}
+  #soulRow{font-size:16px !important;color:var(--soul) !important;}#soulRow b{font-family:'VT323',monospace !important;font-size:20px !important;}
+  .up .nm{font-size:16px !important;}
+  .up .lv{font-family:'VT323',monospace !important;font-size:16px !important;color:var(--orb) !important;}
+  .up.soul .lv{color:var(--soul) !important;}
+  .up .ds{font-size:14px !important;color:var(--muted) !important;line-height:1.25 !important;}
+  .up .cost{font-family:'VT323',monospace !important;font-size:20px !important;color:var(--gold) !important;}
+  .up.soul .cost{color:var(--soul) !important;}.up .ic{font-size:18px !important;}
+  .cbl,.creditsBox p,.note,.qds,.screenFoot,.lockrow .rq{font-size:14px !important;}
+  .creditsBox p b{color:var(--ink) !important;}
+  .card .tag{font-family:'VT323',monospace !important;font-size:13px !important;letter-spacing:0 !important;}
+  .quest .qnm{font-size:15px !important;}.quest .qrew{font-family:'VT323',monospace !important;font-size:13px !important;}
+  .lockrow .lk{font-family:'VT323',monospace !important;font-size:13px !important;}
+  .barLab,.quest .qprog{font-size:11px !important;color:#06070d !important;}
+  #modal textarea{font-family:'VT323',monospace !important;font-size:15px !important;}
+  /* --- panels: carved/sunken hard bevel, flat fills --- */
+  #side{background:var(--bg2) !important;border-left:3px solid #000 !important;background-image:none !important;}
+  #side header{border-bottom:3px solid #000 !important;}
+  .pane{background-image:none !important;}
+  .chip,.card,.creditsBox,#modal .box,.up,.note,#toast,.quest,#modal textarea,.up .ic,.card .cic{
+    border:3px solid #000 !important;background-image:none !important;
+    box-shadow:inset 2px 2px 0 var(--bdark),inset -2px -2px 0 var(--blite) !important;}
+  .card,.creditsBox,#modal .box,#toast{background:var(--panel) !important;}
+  .up{background:var(--panel2) !important;}
+  .chip,.up .ic,.card .cic{background:#0a0c16 !important;}
+  .note{background:rgba(0,0,0,.3) !important;}
+  #modal{background:rgba(4,6,12,.82) !important;}
+  /* --- buttons: raised hard bevel --- */
+  .sbtn,.mini,.cbtn,#death button,#modal button,#pauseBtn,.tab{
+    border:3px solid #000 !important;background:var(--panel2) !important;background-image:none !important;color:var(--ink) !important;
+    box-shadow:inset 2px 2px 0 var(--blite),inset -2px -2px 0 var(--bdark),4px 4px 0 rgba(0,0,0,.55) !important;}
+  .sbtn.primary{background:var(--lume) !important;color:#241a05 !important;}
+  .sbtn.ghost{background:var(--panel) !important;color:var(--muted) !important;}
+  #death button{background:var(--soul) !important;color:#160b28 !important;}
+  #modal button.go{background:var(--lume) !important;color:#241a05 !important;}
+  .sbtn:hover,.mini:hover,.cbtn:hover,.tab:hover{transform:translateY(-1px);}
+  .sbtn:active,.mini:active,.cbtn:active,#death button:active,#modal button:active,.tab:active{
+    box-shadow:inset 2px 2px 0 var(--bdark),inset -2px -2px 0 var(--blite),1px 1px 0 rgba(0,0,0,.55) !important;transform:translate(2px,2px) !important;}
+  .tab{background:var(--panel) !important;}
+  .tab.on{background:var(--panel2) !important;color:var(--lume) !important;box-shadow:inset 2px 2px 0 var(--bdark),inset -2px -2px 0 var(--blite) !important;transform:none !important;}
+  .cbtn{color:var(--muted) !important;}#soundBtn{color:var(--lume) !important;}
+  /* --- tags / bars --- */
+  .card .tag{border:2px solid #000 !important;background:rgba(255,200,58,.16) !important;color:var(--lume) !important;}
+  .bar,.quest .qbar{border:3px solid #000 !important;background:#05060c !important;box-shadow:inset 2px 2px 0 rgba(0,0,0,.6) !important;height:16px !important;}
+  #hpFill{background:var(--hp) !important;}#xpFill{background:var(--xp) !important;}
+  .quest .qfill{background:var(--lume) !important;}.quest.done .qfill{background:var(--void2) !important;}
+  /* --- screens / cards --- */
+  .screen{background:rgba(8,9,16,.9) !important;}
+  .card.locked{filter:grayscale(.5) brightness(.7) !important;}
+  /* --- casino reskin to new palette --- */
+  .casBox{background:var(--panel) !important;box-shadow:0 0 0 3px var(--lume),0 0 0 6px #000,6px 6px 0 rgba(0,0,0,.7) !important;}
+  .casWin{border:3px solid #000 !important;background:#05060c !important;background-image:none !important;}
+  .casMark{border:3px solid var(--lume) !important;box-shadow:0 0 0 1px #000,0 0 12px rgba(255,200,58,.7),inset 0 0 8px rgba(255,200,58,.4) !important;}
+  .casTtl,.casRes{color:var(--lume2) !important;}
 </style>
 </head>
 <body>
@@ -345,7 +430,7 @@
         <div class="cgrp">Pixel Art</div>
         <p><b>DungeonTileset II</b> by <b>0x72</b> (Robert Norenberg) — licensed <b>CC0 1.0</b> (public domain). Individual frames via the <b>ohi-ohi-dungeon</b> project (MIT).</p>
         <div class="cgrp">Font</div>
-        <p><b>Pixelify Sans</b> — Google Fonts (Open Font License).</p>
+        <p><b>Press Start 2P</b> &amp; <b>VT323</b> — Google Fonts (Open Font License).</p>
         <div class="cgrp">Music &amp; Sound</div>
         <p>Procedural — synthesized live in your browser with the <b>Web Audio API</b>. No external files.</p>
         <div class="cgrp">Game</div>
@@ -442,39 +527,40 @@ const BIOME_VARIANTS={
   ],
 };
 function makeBiomePattern(cfg){
-  const T=48,N=5,S=T*N;
-  const cv=document.createElement("canvas");cv.width=cv.height=S;const g=cv.getContext("2d");
-  g.fillStyle=cfg.base;g.fillRect(0,0,S,S);
-  const st=cfg.style;
-  for(let ty=0;ty<N;ty++)for(let tx=0;tx<N;tx++){
-    const r=hsh(tx,ty),c=cfg.tiles[(r*cfg.tiles.length)|0];
-    if(st==='stone'||st==='marble'){
-      g.fillStyle=c;g.fillRect(tx*T+1,ty*T+1,T-2,T-2);
-      g.fillStyle=cfg.hi;g.fillRect(tx*T+1,ty*T+1,T-2,2);
-      g.fillStyle=cfg.sh;g.fillRect(tx*T+1,ty*T+T-3,T-2,2);g.fillRect(tx*T+T-3,ty*T+1,2,T-2);
-      const sp=2+((r*5)|0);
-      for(let i=0;i<sp;i++){const ra=hsh(tx*7+i,ty*13+i),rb=hsh(tx+i*5,ty*3+i);g.fillStyle=ra>0.5?cfg.speck1:cfg.speck2;g.fillRect(tx*T+3+((rb*(T-6))|0),ty*T+3+((ra*(T-6))|0),2,2);}
-      if(st==='stone'&&r>0.80){g.strokeStyle=cfg.crack;g.lineWidth=1;g.beginPath();const cx=tx*T+T*0.3,cy=ty*T+T*0.25;g.moveTo(cx,cy);g.lineTo(cx+T*0.4*hsh(tx,ty+9),cy+T*0.5*hsh(tx+9,ty));g.stroke();}
-      if(cfg.moss&&hsh(tx+3,ty+5)>0.84){g.fillStyle=cfg.moss;g.fillRect(tx*T+2,ty*T+2,T-4,T-4);}
-    } else if(st==='grass'){
-      g.fillStyle=c;g.fillRect(tx*T,ty*T,T,T);
-      if(cfg.moss&&hsh(tx+9,ty+9)>0.86){g.fillStyle=cfg.moss;g.fillRect(tx*T+((r*T*0.5)|0),ty*T+((hsh(tx,ty+1)*T*0.5)|0),(T*0.45)|0,(T*0.35)|0);}
-      const sp=7+((r*8)|0);
-      for(let i=0;i<sp;i++){const ra=hsh(tx*7+i,ty*13+i),rb=hsh(tx+i*5,ty*3+i),rc=hsh(tx*3+i,ty+i*2);const px=tx*T+((rb*T)|0),py=ty*T+((ra*T)|0);
-        if(rc>0.93){g.fillStyle=cfg.flower[(rc*97|0)%cfg.flower.length];g.fillRect(px,py,2,2);}
-        else{g.fillStyle=ra>0.5?cfg.speck1:cfg.speck2;g.fillRect(px,py,1,2);}}
-    } else if(st==='ash'){
-      g.fillStyle=c;g.fillRect(tx*T,ty*T,T,T);
-      const sp=4+((r*5)|0);
-      for(let i=0;i<sp;i++){const ra=hsh(tx*7+i,ty*13+i),rb=hsh(tx+i*5,ty*3+i);g.fillStyle=ra>0.5?cfg.speck1:cfg.speck2;g.fillRect(tx*T+((rb*T)|0),ty*T+((ra*T)|0),2,2);}
-      if(r>0.6){const cy=ty*T+T*0.5*hsh(tx,ty+2)+8;g.strokeStyle=cfg.crack;g.lineWidth=3;g.beginPath();g.moveTo(tx*T+4,cy);g.lineTo(tx*T+T-4,cy+T*0.3*(hsh(tx+5,ty)-0.5)*2);g.stroke();g.strokeStyle=cfg.crack2;g.lineWidth=1;g.stroke();}
+  // build a low-res chunky pixel-art tile, then upscale (each texel -> PX screen px)
+  const st=cfg.style,PX=3,TS=32,tiles=cfg.tiles,base=cfg.base;
+  const tc=document.createElement("canvas");tc.width=tc.height=TS;const g=tc.getContext("2d");
+  g.imageSmoothingEnabled=false;g.fillStyle=base;g.fillRect(0,0,TS,TS);
+  const R=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h);};
+  const P=(x,y,c)=>{g.fillStyle=c;g.fillRect(((x%TS)+TS)%TS,((y%TS)+TS)%TS,1,1);};
+  const LITE="rgba(255,255,255,0.10)",DARK="rgba(0,0,0,0.34)";
+  if(st==='stone'||st==='marble'){
+    const bw=16,bh=8,hiCol=(st==='marble')?(cfg.hi||"rgba(255,255,255,0.30)"):LITE;
+    for(let row=0;row*bh<TS;row++){const ry=row*bh,off=(row%2)?-(bw/2):0;
+      for(let rx=off;rx<TS;rx+=bw){
+        const rnd=hsh((((rx%TS)+TS)%TS)+row*7+3,ry+row*13+5),col=tiles[(rnd*tiles.length|0)%tiles.length];
+        R(rx+1,ry+1,bw-2,bh-2,col);            // brick body (1px base border = mortar)
+        R(rx+1,ry+1,bw-2,1,hiCol);             // top highlight
+        R(rx+1,ry+bh-2,bw-2,1,DARK);           // bottom shadow
+        const r2=hsh(rx*3+1,ry*5+2);
+        if(r2>0.62)P(rx+3+((r2*(bw-6))|0),ry+3,cfg.speck1||LITE);
+        if(r2<0.20)P(rx+bw-4,ry+4,cfg.speck2||DARK);
+      }
     }
+    if(st==='stone'&&cfg.moss)for(let i=0;i<3;i++){if(hsh(i+2,9)>0.45){R((hsh(i+3,7)*TS)|0,(hsh(i+5,11)*TS)|0,2,2,cfg.moss);}}
+    if(st==='stone'&&cfg.crack){let cx=(hsh(3,5)*TS)|0,cy=(hsh(7,2)*TS)|0;for(let s=0;s<8;s++){P(cx,cy,cfg.crack);cx+=((hsh(cx,cy)*3)|0)-1;cy+=1;}}
+  } else if(st==='grass'){
+    for(let y=0;y<TS;y+=2)for(let x=0;x<TS;x+=2){const r=hsh(x*2+1,y*3+2);if(r>0.5){R(x,y,2,2,tiles[(r*tiles.length|0)%tiles.length]);}}
+    for(let i=0;i<24;i++){const bx=(hsh(i*2+1,i+4)*TS)|0,by=(hsh(i*3+2,i+9)*TS)|0,r=hsh(i*5+3,i+1);
+      if(cfg.flower&&r>0.9){P(bx,by,cfg.flower[(r*97|0)%cfg.flower.length]);P(bx,by-1,cfg.flower[(r*53|0)%cfg.flower.length]);}
+      else{P(bx,by,r>0.5?(cfg.speck1||"rgba(150,210,90,0.4)"):"rgba(0,0,0,0.22)");P(bx,by-1,tiles[(r*tiles.length|0)%tiles.length]);}}
+    if(cfg.moss)for(let i=0;i<4;i++)R((hsh(i+1,6)*TS)|0,(hsh(i+8,3)*TS)|0,3,2,cfg.moss);
+  } else { // ash
+    for(let y=0;y<TS;y+=2)for(let x=0;x<TS;x+=2){const r=hsh(x*2+1,y*3+2);if(r>0.55){R(x,y,2,2,tiles[(r*tiles.length|0)%tiles.length]);}}
+    for(let i=0;i<2;i++){let cx=(hsh(i+2,3)*TS)|0,cy=(hsh(i+7,5)*TS)|0;for(let s=0;s<12;s++){P(cx,cy,cfg.crack||"rgba(255,120,30,0.7)");if(s%3===0)P(cx,cy-1,cfg.crack2||"rgba(255,230,120,0.8)");cx+=((hsh(cx,cy)*3)|0)-1;cy+=1;}}
+    for(let i=0;i<5;i++)P((hsh(i+4,2)*TS)|0,(hsh(i+6,9)*TS)|0,cfg.speck1||"rgba(255,150,60,0.3)");
   }
-  // fine single-pixel grain pass — smaller-pixel detail across the whole tile
-  const grainN=(S*S/22)|0;
-  for(let i=0;i<grainN;i++){const rx=(hsh(i*2+1,i+7)*S)|0,ry=(hsh(i*3+5,i*2+11)*S)|0,rr=hsh(i*5+3,i+2);
-    g.fillStyle=rr>0.62?(cfg.speck1||"rgba(255,255,255,0.05)"):(cfg.speck2||"rgba(0,0,0,0.16)");g.fillRect(rx,ry,1,1);}
-  if(cfg.grid){g.strokeStyle=cfg.grout;g.lineWidth=1;g.beginPath();for(let i=0;i<=N;i++){const p=i*T;g.moveTo(p+0.5,0);g.lineTo(p+0.5,S);g.moveTo(0,p+0.5);g.lineTo(S,p+0.5);}g.stroke();}
+  const S=TS*PX,cv=document.createElement("canvas");cv.width=cv.height=S;const u=cv.getContext("2d");u.imageSmoothingEnabled=false;u.drawImage(tc,0,0,S,S);
   return ctx.createPattern(cv,"repeat");
 }
 /* ---- pixel-art props ---- */
@@ -614,12 +700,13 @@ const SHRINE={
 };
 function drawSprR(a,x,y,sc,ang,al){if(!a)return;const w=a.w*sc,h=a.h*sc;ctx.save();ctx.translate(x,y);if(ang)ctx.rotate(ang);if(al!=null)ctx.globalAlpha=al;ctx.imageSmoothingEnabled=false;ctx.drawImage(a.cv,-w/2,-h/2,w,h);ctx.restore();ctx.globalAlpha=1;}
 /* ---- chunky pixel-art glow (ordered-dither radial, baked once per color) ---- */
-const glowCache={};const GBAYER=[[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
+const glowCache={};
 function glowTex(r,g,b){const k=r+","+g+","+b;if(glowCache[k])return glowCache[k];
-  const S=24,STEPS=5,cv=document.createElement("canvas");cv.width=cv.height=S;const x=cv.getContext("2d");const c=(S-1)/2;
-  for(let yy=0;yy<S;yy++)for(let xx=0;xx<S;xx++){let d=Math.hypot(xx-c,yy-c)/(S/2);if(d>1)continue;let a=(1-d);a=a*a;
-    const f=a*STEPS,lo=Math.floor(f),frac=f-lo,thr=(GBAYER[yy&3][xx&3]+0.5)/16,lvl=lo+(frac>thr?1:0),aa=lvl/STEPS;
-    if(aa<=0)continue;x.fillStyle="rgba("+r+","+g+","+b+","+aa.toFixed(3)+")";x.fillRect(xx,yy,1,1);}
+  // low-res clean stepped radial -> chunky concentric pixel rings when scaled up
+  const S=14,STEPS=4,cv=document.createElement("canvas");cv.width=cv.height=S;const x=cv.getContext("2d");const c=(S-1)/2;
+  for(let yy=0;yy<S;yy++)for(let xx=0;xx<S;xx++){const d=Math.hypot(xx-c,yy-c)/(S/2);if(d>1)continue;
+    const lvl=Math.ceil((1-d)*STEPS)/STEPS;if(lvl<=0)continue;
+    x.fillStyle="rgba("+r+","+g+","+b+","+lvl.toFixed(3)+")";x.fillRect(xx,yy,1,1);}
   glowCache[k]=cv;return cv;}
 function drawGlow(cx,cy,rad,col,al){const tex=glowTex(col[0],col[1],col[2]);ctx.save();ctx.globalAlpha=al;ctx.imageSmoothingEnabled=false;ctx.drawImage(tex,Math.round(cx-rad),Math.round(cy-rad),Math.round(rad*2),Math.round(rad*2));ctx.restore();}
 const CICON={
@@ -1026,7 +1113,7 @@ function render(){
     ctx.save();ctx.globalAlpha=.3;ctx.fillStyle="#000";ctx.beginPath();ctx.ellipse(b.x,b.y,dw*0.42,dw*0.16,0,0,TAU);ctx.fill();ctx.restore();
     ctx.imageSmoothingEnabled=false;ctx.drawImage(a.cv,Math.round(b.x-dw/2),Math.round(b.y-dh+bob),dw,dh);
     if(tgt){ctx.strokeStyle=T.col;ctx.lineWidth=2;ctx.strokeRect(Math.round(b.x-dw/2)-3,Math.round(b.y-dh+bob)-3,dw+6,dh+6);}
-    ctx.fillStyle=T.col;ctx.font="600 12px 'Pixelify Sans'";ctx.textAlign="center";ctx.fillText(T.name,b.x,b.y+15);}
+    ctx.fillStyle=T.col;ctx.font="16px 'VT323',monospace";ctx.textAlign="center";ctx.fillText(T.name,b.x,b.y+16);}
   for(const g of gems){if(!drawSpriteH("coin",g.x,g.y,15,false,Math.floor(t*10+g.x*0.3)%4)){ctx.fillStyle="#9ad06a";ctx.fillRect(g.x-2,g.y-2,4,4);}}
   for(const e of enemies){const eh=e.boss?84:e.brute?46:30;
     if(e.boss){const bgl=ctx.createRadialGradient(e.x,e.y-24,4,e.x,e.y-24,68);bgl.addColorStop(0,"rgba(176,106,223,.4)");bgl.addColorStop(1,"rgba(176,106,223,0)");ctx.fillStyle=bgl;ctx.beginPath();ctx.arc(e.x,e.y-24,68,0,TAU);ctx.fill();}
@@ -1052,7 +1139,7 @@ function render(){
     if(!drawSpriteH(hk,hero.x,hero.y-8,44,hero.vx<-4,Math.floor(t*6)%2)){ctx.fillStyle=hero.hurt>0?"#ff9aab":"#fff3d6";ctx.beginPath();ctx.arc(hero.x,hero.y,8,0,TAU);ctx.fill();ctx.strokeStyle="rgba(255,217,138,.9)";ctx.lineWidth=2;ctx.beginPath();ctx.arc(hero.x,hero.y,11,0,TAU);ctx.stroke();}
   }
   for(const p of parts){ctx.globalAlpha=clamp(p.life,0,1);ctx.fillStyle=p.col;const ps=Math.max(1,Math.round(p.r));ctx.fillRect(Math.round(p.x-ps/2),Math.round(p.y-ps/2),ps,ps);}ctx.globalAlpha=1;
-  ctx.textAlign="center";for(const p of pops){ctx.globalAlpha=clamp(p.life,0,1);ctx.font=`700 ${p.size}px 'Pixelify Sans',serif`;ctx.fillStyle=p.col;ctx.fillText(p.txt,p.x,p.y);}ctx.globalAlpha=1;
+  ctx.textAlign="center";for(const p of pops){ctx.globalAlpha=clamp(p.life,0,1);ctx.font=`${Math.round(p.size*1.25)}px 'VT323',monospace`;ctx.fillStyle="#000";ctx.fillText(p.txt,p.x+1,p.y+1);ctx.fillStyle=p.col;ctx.fillText(p.txt,p.x,p.y);}ctx.globalAlpha=1;
   ctx.restore();
   drawMotes();
   if(hero){const danger=1-clamp(hero.hp/hero.max,0,1);if(danger>0.02){const v=ctx.createRadialGradient(W/2,Hh/2,Hh*0.3,W/2,Hh/2,Hh*0.8);v.addColorStop(0,"rgba(255,93,122,0)");v.addColorStop(1,`rgba(255,93,122,${danger*0.3})`);ctx.fillStyle=v;ctx.fillRect(0,0,W,Hh);}}
@@ -1062,7 +1149,7 @@ function render(){
     ctx.fillStyle="#2a0d12";ctx.fillRect(bx,by,bw,12);
     ctx.fillStyle="#e0563f";ctx.fillRect(bx,by,bw*clamp(bb.hp/bb.max,0,1),12);
     ctx.fillStyle="rgba(255,255,255,.22)";ctx.fillRect(bx,by,bw*clamp(bb.hp/bb.max,0,1),3);
-    ctx.fillStyle="#ffe9a8";ctx.font="700 12px 'Pixelify Sans'";ctx.textAlign="center";ctx.fillText("☠ "+(bb.name||"OVERLORD")+" ☠",W/2,by-4);}
+    ctx.fillStyle="#ffe6a0";ctx.font="16px 'VT323',monospace";ctx.textAlign="center";ctx.fillText("☠ "+(bb.name||"OVERLORD")+" ☠",W/2,by-4);}
   if(hero&&run.target){const tsx=run.target.x-cam.x,tsy=run.target.y-cam.y;if(tsx<10||tsx>W-10||tsy<10||tsy>Hh-10){const ang=Math.atan2(tsy-Hh/2,tsx-W/2);const ex=clamp(W/2+Math.cos(ang)*(W*0.42),26,W-26),ey=clamp(Hh/2+Math.sin(ang)*(Hh*0.42),70,Hh-26);const col=BTYPES[run.target.type].col;ctx.save();ctx.translate(ex,ey);ctx.rotate(ang);ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(11,0);ctx.lineTo(-7,-7);ctx.lineTo(-7,7);ctx.closePath();ctx.fill();ctx.restore();}}
   drawMinimap();
 }
