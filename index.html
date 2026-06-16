@@ -1418,6 +1418,8 @@ const SOULUP=[
   {id:"head",ic:"▲",nm:"Head Start",ds:l=>`Begin each run at level +2`,base:2,mul:1.8,max:15},
   {id:"smag",ic:"◈",nm:"Soul Tithe",ds:l=>`+15% souls & +2h offline cap`,base:2,mul:1.7},
 ];
+const META_BY_ID=Object.fromEntries(META.map(u=>[u.id,u]));
+const SOUL_BY_ID=Object.fromEntries(SOULUP.map(u=>[u.id,u]));
 function costOf(u,lvl){return Math.floor(u.base*Math.pow(u.mul,lvl));}
 
 const CHARS=[
@@ -1465,6 +1467,8 @@ function soulBonus(){return 1+S().smag*0.15;}
 
 let run,hero,enemies=[],flybys=[],bossZones=[],gems=[],bolts=[],wisps=[],novas=[],lightning=[],parts=[],pops=[],beacons=[],axes=[],knives=[],pools=[],strikes=[],caltrops=[],birds=[],booms=[],voids=[],briars=[],vials=[],frosts=[],lances=[],spears=[],mines=[],embers=[],shadows=[],crystals=[],toxins=[],stars=[],bells=[],clocks=[],prisms=[],allies=[],rewardCoins=[],relicFlares=[];
 let orbAngle=0;
+let minimapCache={key:"",bg:null,dyn:null,dynAt:-1};
+function resetMinimapCache(){minimapCache={key:"",bg:null,dyn:null,dynAt:-1};}
 const BTYPES={
   cache:{ic:"◇",col:"#f0c04a",name:"Treasure Hoard"},
   font:{ic:"+",col:"#8fd06a",name:"Holy Shrine"},
@@ -1503,6 +1507,7 @@ function startRun(charId,mapId){
   hero={x:startPos.x,y:startPos.y,hp:maxHpV(),max:maxHpV(),vx:0,vy:0,face:1,walkT:0,moving:false,lastX:startPos.x,lastY:startPos.y,hurt:0,hurtFlash:0,hurtFx:0,dashT:0,dashVx:0,dashVy:0,dashHit:new Set(),longT:0,longVx:0,longVy:0};
   cam.x=hero.x-W/2;cam.y=hero.y-Hh/2;
   genObstacles();
+  resetMinimapCache();
   enemies.length=flybys.length=bossZones.length=gems.length=bolts.length=wisps.length=novas.length=lightning.length=parts.length=pops.length=0;
   axes.length=knives.length=pools.length=strikes.length=caltrops.length=birds.length=booms.length=voids.length=briars.length=vials.length=frosts.length=lances.length=spears.length=mines.length=embers.length=shadows.length=crystals.length=toxins.length=stars.length=bells.length=clocks.length=prisms.length=allies.length=rewardCoins.length=relicFlares.length=0;
   if(casino){casino.active=false;const ce=$("#casino"),reel=$("#casReel");if(ce)ce.classList.remove("show","spin","won");if(reel){reel.classList.remove("spinning","rolling");reel.style.transition="none";reel.style.transform="translate3d(0,0,0)";}}
@@ -2366,29 +2371,39 @@ function render(){
   if(!screenshotMode)drawMinimap();
 }
 function drawMinimap(){
-  const mw=148,mh=mw*WORLD.h/WORLD.w,px=W-mw-14,py=58;
-  ctx.save();ctx.globalAlpha=.92;
-  ctx.fillStyle="rgba(8,16,26,.7)";ctx.fillRect(px,py,mw,mh);
-  ctx.strokeStyle="rgba(45,80,112,.8)";ctx.lineWidth=1;ctx.strokeRect(px,py,mw,mh);
-  const sx=mw/WORLD.w,sy=mh/WORLD.h;
-  ctx.fillStyle="rgba(120,96,64,.95)";for(const o of obstacles){if(o.col>0)ctx.fillRect(px+o.x*sx-1,py+o.y*sy-1,2.4,2.4);}
-  ctx.fillStyle="rgba(150,200,90,.6)";for(const e of enemies)ctx.fillRect(px+e.x*sx-0.5,py+e.y*sy-0.5,1.4,1.4);
-  ctx.fillStyle="rgba(190,232,255,.65)";for(const f of flybys)ctx.fillRect(px+f.x*sx-1,py+f.y*sy-1,2,2);
-  for(const b of beacons){ctx.fillStyle=BTYPES[b.type].col;ctx.beginPath();ctx.arc(px+b.x*sx,py+b.y*sy,2.6,0,TAU);ctx.fill();}
+  const mw=Math.max(104,Math.min(148,Math.floor(W*0.24))),mh=Math.max(42,Math.round(mw*WORLD.h/WORLD.w)),px=W-mw-14,py=58;
+  const sx=mw/WORLD.w,sy=mh/WORLD.h,key=[curMap&&curMap.id,WORLD.w,WORLD.h,mw,mh,obstacles.length].join("|");
+  if(minimapCache.key!==key||!minimapCache.bg){
+    const bg=document.createElement("canvas");bg.width=mw;bg.height=mh;const g=bg.getContext("2d");g.imageSmoothingEnabled=false;
+    g.fillStyle="rgba(8,16,26,.7)";g.fillRect(0,0,mw,mh);
+    if(curMap&&curMap.rooms){g.fillStyle="rgba(90,92,120,.18)";for(const r of curMap.rooms)g.fillRect(Math.round(r.x*sx),Math.round(r.y*sy),Math.max(1,Math.round(r.w*sx)),Math.max(1,Math.round(r.h*sy)));}
+    g.fillStyle="rgba(120,96,64,.95)";for(const o of obstacles){if(o.col>0)g.fillRect(Math.round(o.x*sx-1),Math.round(o.y*sy-1),2,2);}
+    g.strokeStyle="rgba(45,80,112,.8)";g.lineWidth=1;g.strokeRect(0.5,0.5,mw-1,mh-1);
+    minimapCache={key,bg,dyn:null,dynAt:-1};
+  }
+  if(!minimapCache.dyn||t-minimapCache.dynAt>0.08){
+    const dyn=minimapCache.dyn||document.createElement("canvas");if(dyn.width!==mw)dyn.width=mw;if(dyn.height!==mh)dyn.height=mh;
+    const d=dyn.getContext("2d");d.clearRect(0,0,mw,mh);
+    d.fillStyle="rgba(150,200,90,.6)";for(const e of enemies)d.fillRect(e.x*sx-0.5,e.y*sy-0.5,1.4,1.4);
+    d.fillStyle="rgba(190,232,255,.65)";for(const f of flybys)d.fillRect(f.x*sx-1,f.y*sy-1,2,2);
+    for(const b of beacons){d.fillStyle=BTYPES[b.type].col;d.beginPath();d.arc(b.x*sx,b.y*sy,2.6,0,TAU);d.fill();}
+    minimapCache.dyn=dyn;minimapCache.dynAt=t;
+  }
+  ctx.save();ctx.globalAlpha=.92;ctx.drawImage(minimapCache.bg,px,py);if(minimapCache.dyn)ctx.drawImage(minimapCache.dyn,px,py);
   ctx.strokeStyle="rgba(231,241,240,.4)";ctx.lineWidth=1;ctx.strokeRect(px+cam.x*sx,py+cam.y*sy,W*sx,Hh*sy);
   if(hero){ctx.fillStyle="#ffd98a";ctx.beginPath();ctx.arc(px+hero.x*sx,py+hero.y*sy,3,0,TAU);ctx.fill();}
   ctx.restore();
 }
 
-let goldEMA=0,lastGold=0,questT=0;
+let goldEMA=0,lastGold=0,questT=0,hudT=0,affordT=0,hudMemo={};
+function setHudText(id,val){val=String(val);if(hudMemo[id]===val)return;const el=$("#"+id);if(el){el.textContent=val;hudMemo[id]=val;}}
+function setHudWidth(id,val){val=Math.round(val*10)/10+"%";if(hudMemo[id]===val)return;const el=$("#"+id);if(el){el.style.width=val;hudMemo[id]=val;}}
 function hudTick(dt){
-  $("#hWave").textContent=run.wave;$("#hTime").textContent=fmtTime(run.time);$("#hKills").textContent=run.kills;$("#hLevel").textContent=run.level;
-  if(hero){$("#hpFill").style.width=clamp(hero.hp/hero.max,0,1)*100+"%";$("#hpLab").textContent=Math.ceil(Math.max(0,hero.hp))+" / "+hero.max;}
-  $("#xpFill").style.width=clamp(run.xp/run.xpNeed,0,1)*100+"%";$("#xpLab").textContent="LVL "+run.level;
-  $("#goldBig").textContent=fmt(G.gold);$("#soulHdr").textContent=G.soul;
   const inst=(G.gold-lastGold)/Math.max(dt,1e-4);lastGold=G.gold;goldEMA=goldEMA*0.96+Math.max(0,inst)*0.04;G.goldEMA=goldEMA;
-  $("#goldRate").textContent="+"+fmt(goldEMA)+" / sec";
-  refreshAfford();
+  if(hero){setHudWidth("hpFill",clamp(hero.hp/hero.max,0,1)*100);setHudText("hpLab",Math.ceil(Math.max(0,hero.hp))+" / "+hero.max);}
+  setHudWidth("xpFill",clamp(run.xp/run.xpNeed,0,1)*100);setHudText("xpLab","LVL "+run.level);
+  hudT-=dt;if(hudT<=0){hudT=0.12;setHudText("hWave",run.wave);setHudText("hTime",fmtTime(run.time));setHudText("hKills",run.kills);setHudText("hLevel",run.level);setHudText("goldBig",fmt(G.gold));setHudText("soulHdr",G.soul);setHudText("goldRate","+"+fmt(goldEMA)+" / sec");}
+  affordT-=dt;if(affordT<=0){affordT=0.18;refreshAfford();}
   questT-=dt;if(questT<=0){questT=0.4;const qt=document.querySelector('.tab[data-tab="quest"]');if(qt&&qt.classList.contains("on"))buildQuests();}
   if(toastT>0){toastT-=dt;if(toastT<=0)$("#toast").classList.remove("show");}
 }
@@ -2426,11 +2441,11 @@ function rowEl(u,lvl,soul){
   btn.onclick=()=>buy(u,soul);
   return btn;
 }
-function buy(u,soul){const map=soul?G.s:G.m,lvl=map[u.id];if(u.max&&lvl>=u.max)return;const c=costOf(u,lvl);const bank=soul?G.soul:G.gold;if(bank<c)return;if(soul)G.soul-=c;else G.gold-=c;map[u.id]++;if(u.id==="vit"&&hero)hero.max=maxHpV();updateRow(u,soul);}
+function buy(u,soul){const map=soul?G.s:G.m,lvl=map[u.id];if(u.max&&lvl>=u.max)return;const c=costOf(u,lvl);const bank=soul?G.soul:G.gold;if(bank<c)return;if(soul)G.soul-=c;else G.gold-=c;map[u.id]++;if(u.id==="vit"&&hero)hero.max=maxHpV();updateRow(u,soul);refreshAfford();}
 function updateRow(u,soul){const btn=$(`.up[data-id="${u.id}"][data-soul="${soul?1:0}"]`);if(!btn)return;const lvl=(soul?G.s:G.m)[u.id];btn.querySelector(".lv").textContent="Lv "+lvl;btn.querySelector(".ds").textContent=u.ds(lvl);btn.classList.toggle("locked",u.abil&&lvl===0);const maxed=u.max&&lvl>=u.max;const c=btn.querySelector(".cost");c.classList.remove("unlock");c.textContent=maxed?"MAX":fmt(costOf(u,lvl));}
 function refreshAfford(){
-  document.querySelectorAll("#forgePane .up").forEach(btn=>{const u=META.find(x=>x.id===btn.dataset.id);const lvl=G.m[u.id];const maxed=u.max&&lvl>=u.max;const can=!maxed&&G.gold>=costOf(u,lvl);btn.disabled=maxed||!can;btn.classList.toggle("afford",can);});
-  document.querySelectorAll("#soulPane .up").forEach(btn=>{const u=SOULUP.find(x=>x.id===btn.dataset.id);const lvl=G.s[u.id];const maxed=u.max&&lvl>=u.max;const can=!maxed&&G.soul>=costOf(u,lvl);btn.disabled=maxed||!can;btn.classList.toggle("afford",can);});
+  document.querySelectorAll("#forgePane .up").forEach(btn=>{const u=META_BY_ID[btn.dataset.id];if(!u)return;const lvl=G.m[u.id];const maxed=u.max&&lvl>=u.max;const can=!maxed&&G.gold>=costOf(u,lvl);btn.disabled=maxed||!can;btn.classList.toggle("afford",can);});
+  document.querySelectorAll("#soulPane .up").forEach(btn=>{const u=SOUL_BY_ID[btn.dataset.id];if(!u)return;const lvl=G.s[u.id];const maxed=u.max&&lvl>=u.max;const can=!maxed&&G.soul>=costOf(u,lvl);btn.disabled=maxed||!can;btn.classList.toggle("afford",can);});
 }
 document.querySelectorAll(".tab").forEach(tb=>tb.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));tb.classList.add("on");const t=tb.dataset.tab;$("#forgePane").style.display=t==="forge"?"block":"none";$("#soulPane").style.display=t==="soul"?"block":"none";$("#questPane").style.display=t==="quest"?"block":"none";if(t==="quest")buildQuests();});
 $("#dNow").onclick=()=>{deathTimer=0;};
