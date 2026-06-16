@@ -26,6 +26,7 @@ On Windows, run **`Start-DesktopBackground.ps1`** to launch the local game as a 
 - **Realms** — The Dungeon (a big interconnected layout of rooms), Greenwood, The Heavens (open sky), and The Inferno — each with its own tiles, props, lighting, and enemy tint.
 - **Abilities** — orbital blades, bolts, nova, chain lightning, aura, wraiths, throwing axes, spectral knives, holy water, storm calling, spike fields, war pigeons, cross boomerangs — auto-applied and auto-upgraded.
 - **Bosses** every few waves, roaming ability/power chests, progression via gold upgrades, soul ascensions, missions, and offline gold.
+- **Run finale** at level 50, with a victory payout. After level 40 the horde enters nightmare scaling with stronger enemies, denser swarms, more brutes, and faster boss attacks.
 - **Windows-2000 retro UI** and a procedural **Web Audio** soundtrack + SFX (toggle with the ♪ button).
 
 ## Credits
