@@ -925,7 +925,7 @@ function routeScoreTo(p,pad){
 }
 function chooseTargetBeacon(){let best=null,bd=1e18;for(const b of beacons){const d=routeScoreTo(b,14);if(d<bd){bd=d;best=b;}}return best;}
 function clampToRegion(e,pad){const rm=curMap&&curMap.rooms;
-  if(!rm){e.x=clamp(e.x,pad,WORLD.w-pad);e.y=clamp(e.y,pad,WORLD.h-pad);if(hasGridWalls()&&!inRegionPad(e.x,e.y,pad)){const c=gridCellAt(e.x,e.y),p=gridCellPoint(c.cx,c.cy);e.x=p.x;e.y=p.y;}return;}
+  if(!rm){e.x=clamp(e.x,pad,WORLD.w-pad);e.y=clamp(e.y,pad,WORLD.h-pad);if(hasGridWalls()&&!inRegionPad(e.x,e.y,pad)){const p=nearestStandPoint(e.x,e.y,pad,false,110);if(p){e.x=p.x;e.y=p.y;}else{const c=gridCellAt(e.x,e.y),cp=gridCellPoint(c.cx,c.cy);e.x=cp.x;e.y=cp.y;}}return;}
   for(const r of rm){if(e.x>=r.x+pad&&e.x<=r.x+r.w-pad&&e.y>=r.y+pad&&e.y<=r.y+r.h-pad)return;}
   let bx=e.x,by=e.y,bd=1e18;
   for(const r of rm){const cx=clamp(e.x,r.x+pad,r.x+r.w-pad),cy=clamp(e.y,r.y+pad,r.y+r.h-pad),dxx=cx-e.x,dyy=cy-e.y,d=dxx*dxx+dyy*dyy;if(d<bd){bd=d;bx=cx;by=cy;}}
@@ -1079,6 +1079,14 @@ function obstacleBlocked(x,y,rad,ignore){
   return null;
 }
 function canStand(x,y,rad,solidProps){return inRegionPad(x,y,rad)&&(!solidProps||!obstacleBlocked(x,y,rad));}
+function nearestStandPoint(x,y,rad,solidProps,maxR){
+  if(canStand(x,y,rad,solidProps))return {x,y};
+  const dirs=[[1,0],[-1,0],[0,1],[0,-1],[.707,.707],[-.707,.707],[.707,-.707],[-.707,-.707]];
+  for(let r=6;r<=(maxR||96);r+=6){
+    for(const d of dirs){const px=x+d[0]*r,py=y+d[1]*r;if(canStand(px,py,rad,solidProps))return {x:px,y:py};}
+  }
+  return null;
+}
 function pushOut(ent,rad){
   for(let pass=0;pass<3;pass++){
     let moved=false;
@@ -2032,6 +2040,25 @@ function closeSolidObstacle(rad,pad){
   for(const o of obstacles){if(o.col<=0)continue;const d=dist(hero,o),lim=o.col+rad+(pad||0);if(d<lim&&d<bd){best=o;bd=d;}}
   return best;
 }
+function escapeStuck(dx,dy,rad,block){
+  if(!hero||!run)return false;
+  const l=Math.hypot(dx,dy)||1,ix=dx/l,iy=dy/l,side=run.stuckSide||1,tries=[];
+  if(block){
+    let nx=hero.x-block.x,ny=hero.y-block.y,d=Math.hypot(nx,ny)||1;nx/=d;ny/=d;
+    tries.push([nx*48,ny*48],[-ny*side*58,nx*side*58],[ny*side*58,-nx*side*58]);
+  }
+  tries.push([-iy*side*62,ix*side*62],[iy*side*62,-ix*side*62],[-ix*44,-iy*44]);
+  if(hasGridWalls()){const c=gridCellAt(hero.x,hero.y),p=c&&gridCellPoint(c.cx,c.cy);if(p)tries.push([p.x-hero.x,p.y-hero.y]);}
+  for(const tr of tries){
+    for(const s of [0.42,0.7,1]){
+      const px=hero.x+tr[0]*s,py=hero.y+tr[1]*s;
+      if(canStand(px,py,rad,true)){hero.x=px;hero.y=py;hero.vx*=0.15;hero.vy*=0.15;run.target=null;run.stuckT=0.04;return true;}
+    }
+  }
+  const p=nearestStandPoint(hero.x,hero.y,rad,true,120);
+  if(p){hero.x=p.x;hero.y=p.y;hero.vx=0;hero.vy=0;run.target=null;run.stuckT=0.04;return true;}
+  return false;
+}
 function updateHeroMotionState(dt,ix,iy){
   if(!hero)return;
   if(hero.face==null)hero.face=1;
@@ -2101,13 +2128,14 @@ function update(dt){
     moveEntity(hero,hero.vx*dt,hero.vy*dt,14,true);
   }
   pushOut(hero,12);clampToRegion(hero,14);updateHeroMotionState(dt,dx/dl,dy/dl);
-  const hMove=Math.hypot(hero.x-oldX,hero.y-oldY),stuckBlock=closeSolidObstacle(14,22);
-  if(!manual&&hero.longT<=0&&hero.dashT<=0&&stuckBlock&&hMove<Math.max(0.28,sp*dt*0.12)){
+  const hMove=Math.hypot(hero.x-oldX,hero.y-oldY),stuckBlock=closeSolidObstacle(14,22),blockedAhead=!canStand(hero.x+(dx/dl)*24,hero.y+(dy/dl)*24,14,true);
+  if(!manual&&hero.longT<=0&&hero.dashT<=0&&(stuckBlock||blockedAhead)&&hMove<Math.max(0.28,sp*dt*0.12)){
     run.stuckT=(run.stuckT||0)+dt;
     if(!run.stuckSide){
-      const cx=hero.x-stuckBlock.x,cy=hero.y-stuckBlock.y;
-      run.stuckSide=(dx*cy-dy*cx)>=0?1:-1;
+      if(stuckBlock){const cx=hero.x-stuckBlock.x,cy=hero.y-stuckBlock.y;run.stuckSide=(dx*cy-dy*cx)>=0?1:-1;}
+      else run.stuckSide=(Math.sin(hero.x*0.17+hero.y*0.23)>0)?1:-1;
     }
+    if(run.stuckT>0.36)escapeStuck(dx,dy,14,stuckBlock);
   }else{
     run.stuckT=Math.max(0,(run.stuckT||0)-dt*2.5);
     if(run.stuckT<=0)run.stuckSide=0;
