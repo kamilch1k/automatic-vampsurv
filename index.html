@@ -958,34 +958,86 @@ function backdropPalette(id){
   if(id==="inferno")return {bands:["#090404","#180907","#26100b","#35170d"],speck:["#ff8a2a","#ffd24a","#6f1b12"],trim:"#e0563f"};
   return {bands:["#050407","#09070d","#0d0a14","#130f1d"],speck:["#f0c04a","#7a54a6","#2a2032"],trim:"#46312b"};
 }
+/* ---- fancy pixel-art skyboxes (screen-anchored, chunky) ---- */
+function pxDisc(cx,cy,r,col){ctx.fillStyle=col;const r2=r*r;for(let y=-r;y<=r;y+=4)for(let x=-r;x<=r;x+=4){if(x*x+y*y<=r2)ctx.fillRect(Math.round(cx+x),Math.round(cy+y),4,4);}}
+function bdCloud(x,y,w){const h=w*0.5;ctx.fillRect(Math.round(x),Math.round(y+h*0.45),Math.round(w),Math.round(h*0.5));for(let i=0;i<5;i++){const bw=w*(0.30-Math.abs(i-2)*0.05),bx=x+w*(0.08+i*0.2)-bw/2,by=y+h*0.45-w*(0.16+(i===2?0.16:i===1||i===3?0.08:0));ctx.fillRect(Math.round(bx),Math.round(by),Math.round(bw),Math.round(w*0.30));}}
+function bdPine(x,baseY,h){const w=h*0.55;for(let r=0;r<h*0.82;r+=6){const ww=w*(1-r/(h*0.82));ctx.fillRect(Math.round(x-ww/2),Math.round(baseY-h+r),Math.round(Math.max(6,ww)),6);}}
+function bdHill(x0,x1,baseY,amp,freq,phase,depth,col){ctx.fillStyle=col;for(let x=x0;x<x1;x+=6){const y=baseY-Math.round((Math.sin(x*freq+phase)*0.5+0.5)*amp);ctx.fillRect(x,y,6,depth);}}
+function bdSpire(x,baseY,h){const w=h*0.5;for(let r=0;r<h;r+=6){const ww=Math.max(6,w*(1-r/h)*(0.78+0.22*Math.sin(r*0.09+x)));ctx.fillRect(Math.round(x-ww/2),Math.round(baseY-h+r),Math.round(ww),6);}}
+function bdArch(x,topY,w,h){const cx=x+w/2,r=w/2;for(let yy=0;yy<=r;yy+=4){const ww=2*Math.sqrt(Math.max(0,r*r-(r-yy)*(r-yy)));ctx.fillRect(Math.round(cx-ww/2),Math.round(topY+yy),Math.round(ww),4);}ctx.fillRect(Math.round(x),Math.round(topY+r),Math.round(w),Math.round(h));}
+function bdColumn(x,baseY,w,h,light,mid,dark,gold){
+  ctx.fillStyle=light;ctx.fillRect(x-5,baseY-h,w+10,7);ctx.fillStyle=dark;ctx.fillRect(x-5,baseY-h+7,w+10,2);ctx.fillStyle=gold;ctx.fillRect(x-5,baseY-h+9,w+10,2);
+  ctx.fillStyle=mid;ctx.fillRect(x,baseY-h+11,w,h-21);
+  for(let fx=x+1;fx<x+w-2;fx+=5){ctx.fillStyle=light;ctx.fillRect(fx,baseY-h+12,2,h-23);ctx.fillStyle=dark;ctx.fillRect(fx+2,baseY-h+12,1,h-23);}
+  ctx.fillStyle=dark;ctx.fillRect(x+w-3,baseY-h+11,3,h-21);
+  ctx.fillStyle=light;ctx.fillRect(x-6,baseY-10,w+12,10);ctx.fillStyle=dark;ctx.fillRect(x-6,baseY-2,w+12,2);
+}
+function bdTemple(cx,baseY,w,h,light,mid,dark,gold){
+  const x0=cx-w/2,colH=h*0.58;
+  ctx.fillStyle=mid;ctx.fillRect(x0-24,baseY+16,w+48,9);ctx.fillStyle=dark;ctx.fillRect(x0-24,baseY+23,w+48,2);
+  ctx.fillStyle=light;ctx.fillRect(x0-16,baseY+8,w+32,9);ctx.fillStyle=dark;ctx.fillRect(x0-16,baseY+15,w+32,2);
+  ctx.fillStyle=light;ctx.fillRect(x0-9,baseY,w+18,9);ctx.fillStyle=dark;ctx.fillRect(x0-9,baseY+7,w+18,2);
+  const n=6,cwd=22,gap=(w-n*cwd)/(n-1);
+  for(let i=0;i<n;i++)bdColumn(Math.round(x0+i*(cwd+gap)),baseY,cwd,colH,light,mid,dark,gold);
+  const ey=baseY-colH;
+  ctx.fillStyle=light;ctx.fillRect(x0-14,ey-11,w+28,11);ctx.fillStyle=dark;ctx.fillRect(x0-14,ey-1,w+28,2);
+  ctx.fillStyle=mid;for(let dx=x0-12;dx<x0+w+12;dx+=10)ctx.fillRect(dx,ey-17,6,5);
+  ctx.fillStyle=light;ctx.fillRect(x0-16,ey-20,w+32,3);
+  const pH=h*0.32,apexY=ey-20;
+  for(let r=0;r<pH;r+=4){const ww=(w+32)*(1-r/pH);ctx.fillStyle=(r<4)?gold:(((r>>2)&1)?mid:light);ctx.fillRect(Math.round(cx-ww/2),Math.round(apexY-r-4),Math.round(ww),4);}
+  const tcx=cx,tcy=apexY-pH*0.42;ctx.fillStyle=gold;for(let k=0;k<8;k++){const a=k/8*TAU;ctx.fillRect(Math.round(tcx+Math.cos(a)*12-1),Math.round(tcy+Math.sin(a)*12-1),3,3);}pxDisc(tcx,tcy,6,gold);
+  ctx.fillStyle=gold;ctx.fillRect(cx-4,Math.round(apexY-pH-7),8,8);
+}
+function bdSky(id){
+  if(id==="heaven")return ["#2f7fd0","#3f97e2","#5fb0ee","#86c9f6","#aedcfb","#cbe9fc"];
+  if(id==="green")return ["#79c6ef","#a6dbf2","#cfeccf","#a9d27e","#6f9e4a","#3f6f2a"];
+  if(id==="inferno")return ["#140405","#290a08","#491209","#7a2010","#bd431a","#f08a2a"];
+  return ["#06050c","#0a0814","#11101f","#191730","#221d3a","#2c2747"];
+}
+function drawHeavenPantheon(X,Y,vw,vh){
+  const horizon=Y+vh*0.66,L="#ffffff",M="#bcd0e6",D="#7e9cbe",G="#ffcf57",sx=X+vw*0.17,sy=Y+vh*0.19;
+  for(let k=0;k<12;k++){const a=k/12*TAU+t*0.04;ctx.fillStyle="#ffd23f";ctx.fillRect(Math.round(sx+Math.cos(a)*80-5),Math.round(sy+Math.sin(a)*80-5),10,10);}
+  for(let a=0;a<TAU;a+=0.32)for(let r=54;r<76;r+=6){if(((r/6|0)+(a*5|0))&1)continue;ctx.fillStyle="rgba(255,221,120,.45)";ctx.fillRect(Math.round(sx+Math.cos(a)*r),Math.round(sy+Math.sin(a)*r),5,5);}
+  pxDisc(sx,sy,46,"#ffd23f");pxDisc(sx,sy,34,"#ffe98a");pxDisc(sx,sy,20,"#fff7d2");
+  ctx.fillStyle="#ffffff";for(let i=0;i<8;i++){const cw2=60+i*12,cxp=((i*271+t*(6+i*2))%(vw+560))-280,cyp=vh*(0.08+0.46*hsh(i*7+1,3));bdCloud(X+cxp,Y+cyp,cw2);}
+  ctx.fillStyle="#ffffff";bdCloud(X+vw*0.5-200,horizon+6,260);bdCloud(X+vw*0.5+50,horizon+12,200);
+  bdTemple(X+vw*0.5,horizon,320,182,L,M,D,G);
+  for(const i of [-3,-2,2,3]){bdColumn(Math.round(X+vw*0.5+i*170-11),Math.round(horizon+6),22,150-Math.abs(i)*12,L,M,D,G);}
+  for(const fx of [0.1,0.9]){const px=X+vw*fx;ctx.fillStyle=M;ctx.fillRect(px-16,horizon-2,32,20);ctx.fillStyle=D;ctx.fillRect(px-16,horizon+16,32,2);ctx.fillStyle=L;ctx.fillRect(px-9,horizon-50,18,48);ctx.fillStyle=M;ctx.fillRect(px-9,horizon-50,4,48);ctx.fillStyle=L;ctx.fillRect(px-16,horizon-44,8,22);ctx.fillRect(px+8,horizon-44,8,22);ctx.fillStyle=G;ctx.fillRect(px-7,horizon-60,14,10);}
+  ctx.fillStyle="rgba(206,228,250,.4)";ctx.fillRect(X,Math.round(horizon+170),vw,vh);
+}
+function drawGreenVista(X,Y,vw,vh){
+  const horizon=Y+vh*0.52;
+  pxDisc(X+vw*0.8,Y+vh*0.18,30,"#fff7cf");pxDisc(X+vw*0.8,Y+vh*0.18,22,"#ffffff");
+  ctx.fillStyle="rgba(255,255,255,.7)";for(let i=0;i<4;i++){const cxp=((i*331+t*5)%(vw+360))-180;bdCloud(X+cxp,Y+vh*(0.1+0.2*hsh(i+2,5)),50);}
+  bdHill(X-6,X+vw+6,horizon+6,70,0.0016,1.0,vh,"#6f9e4a");
+  bdHill(X-6,X+vw+6,horizon+34,90,0.0026,3.4,vh,"#557e36");
+  ctx.fillStyle="#2f5320";for(let x=X-46;x<X+vw+46;x+=44){bdPine(x+((x*7)%14),horizon+46,72+hsh((x|0),7)*44);}
+  ctx.fillStyle="#1d2a18";for(let i=0;i<5;i++){const bx=X+((i*240+t*20)%(vw+200))-100,by=Y+vh*0.2+Math.sin(t*0.6+i)*9;ctx.fillRect(bx,by,4,2);ctx.fillRect(bx-4,by-2,4,2);ctx.fillRect(bx+4,by-2,4,2);}
+}
+function drawInfernoVista(X,Y,vw,vh){
+  const horizon=Y+vh*0.6;
+  pxDisc(X+vw*0.5,Y+vh*0.2,42,"#7a1208");pxDisc(X+vw*0.5,Y+vh*0.2,30,"#c0431a");pxDisc(X+vw*0.5,Y+vh*0.2,16,"#ff8a2a");
+  ctx.fillStyle="#190808";for(let x=X-60;x<X+vw+60;x+=130)bdSpire(x+((x*5)%20),horizon+70,130+hsh((x|0),3)*150);
+  ctx.fillStyle="#ff8a2a";ctx.fillRect(X,horizon+58,vw,10);ctx.fillStyle="#ffd24a";for(let x=X;x<X+vw;x+=12)if(hsh((x|0),9)>0.5)ctx.fillRect(x,horizon+55,6,5);
+  ctx.fillStyle="rgba(0,0,0,.35)";ctx.fillRect(X,horizon+68,vw,vh);
+  ctx.fillStyle="#ff8a2a";for(let i=0;i<46;i++){const ex=X+((i*89)%vw),ey=Y+vh-((t*36+i*61)%vh);ctx.fillRect(ex,ey,3,3);if((i&3)===0){ctx.fillStyle="#ffd24a";ctx.fillRect(ex,ey-3,2,2);ctx.fillStyle="#ff8a2a";}}
+}
+function drawDungeonCrypt(X,Y,vw,vh){
+  ctx.fillStyle="rgba(0,0,0,.45)";for(let x=X-40;x<X+vw+40;x+=190)bdArch(x,Y+vh*0.16,130,vh*0.6);
+  ctx.fillStyle="rgba(120,96,64,.10)";for(let y=Y;y<Y+vh;y+=42)ctx.fillRect(X,y,vw,2);
+  ctx.fillStyle="rgba(150,150,165,.16)";for(let x=X+50;x<X+vw;x+=150)for(let y=Y;y<Y+vh*0.4;y+=10)ctx.fillRect(x,y,3,5);
+  for(let x=X+100;x<X+vw;x+=190){const fy=Y+vh*0.3;drawGlow(x,fy,42,[255,150,60],0.5,4);ctx.fillStyle="#ffd24a";ctx.fillRect(x-3,fy-12,6,16);ctx.fillStyle="#ff8a2a";ctx.fillRect(x-2,fy-18+(Math.sin(t*7+x)>0?0:2),4,8);ctx.fillStyle="#5a4636";ctx.fillRect(x-2,fy+4,4,14);}
+}
 function drawPixelBackdrop(bm){
-  const vw=viewW(),vh=viewH(),id=(bm&&bm.id)||"dungeon",pal=backdropPalette(id),x0=cam.x-96,y0=cam.y-96,x1=cam.x+vw+96,y1=cam.y+vh+96,band=96;
-  for(let y=Math.floor(y0/band)*band;y<y1;y+=band){const c=pal.bands[Math.abs(Math.floor(y/band))%pal.bands.length];ctx.fillStyle=c;ctx.fillRect(x0,y,x1-x0,band);}
-  const step=id==="heaven"?88:id==="inferno"?72:80;
-  for(let gy=Math.floor(y0/step)-1;gy<=Math.floor(y1/step)+1;gy++)for(let gx=Math.floor(x0/step)-1;gx<=Math.floor(x1/step)+1;gx++){
-    const r=hsh(gx*17+3,gy*29+7);if(r<0.62)continue;
-    const px=gx*step+Math.floor(hsh(gx,gy)*step),py=gy*step+Math.floor(hsh(gx+9,gy+2)*step),sz=2+((r*5)|0)%4;
-    ctx.fillStyle=pal.speck[(r*99|0)%pal.speck.length];ctx.fillRect(px,py,sz,sz);
-    if(id==="inferno"&&r>0.88)ctx.fillRect(px+sz+2,py+1,sz,2);
-  }
-  if(id==="dungeon"){
-    ctx.fillStyle="rgba(0,0,0,.28)";
-    for(let x=Math.floor(x0/220)*220;x<x1;x+=220){ctx.fillRect(x,y0,26,y1-y0);ctx.fillRect(x+24,y0+48,118,18);ctx.fillRect(x+118,y0,26,y1-y0);}
-    ctx.fillStyle="rgba(240,192,74,.12)";for(let x=Math.floor(x0/180)*180;x<x1;x+=180)ctx.fillRect(x+34,Math.floor((cam.y+vh*.32)/24)*24,14,32);
-  }else if(id==="green"){
-    ctx.fillStyle="rgba(0,0,0,.20)";for(let x=Math.floor(x0/170)*170;x<x1;x+=170){const h=90+Math.floor(hsh(x,5)*90);ctx.fillRect(x,y1-h,26,h);ctx.fillRect(x-20,y1-h-18,66,28);}
-    ctx.fillStyle="rgba(85,160,205,.16)";for(let x=Math.floor(x0/300)*300;x<x1;x+=300){const y=y0+120+Math.floor(hsh(x,13)*(y1-y0-240));ctx.fillRect(x+34,y,92,16);ctx.fillRect(x+18,y+16,126,18);ctx.fillRect(x+48,y+34,68,10);}
-  }else if(id==="heaven"){
-    for(let x=Math.floor(x0/240)*240;x<x1;x+=240){
-      const y=y0+88+((x/240)&1)*64;
-      ctx.fillStyle="rgba(255,255,255,.34)";ctx.fillRect(x,y,132,18);ctx.fillRect(x+18,y-22,96,22);
-      ctx.fillStyle="rgba(220,236,250,.42)";for(let k=0;k<4;k++)ctx.fillRect(x+20+k*24,y+18,10,58);
-      ctx.fillStyle="rgba(255,244,192,.28)";ctx.fillRect(x+14,y+76,110,8);
-    }
-    ctx.fillStyle="rgba(255,255,255,.24)";for(let x=Math.floor(x0/360)*360;x<x1;x+=360){const y=y0+250+((x/360)&1)*70;ctx.fillRect(x+30,y,34,78);ctx.fillRect(x+84,y,34,78);ctx.fillRect(x+22,y-10,104,12);ctx.fillRect(x+34,y+30,72,10);}
-  }else{
-    ctx.fillStyle="rgba(255,90,32,.18)";for(let x=Math.floor(x0/190)*190;x<x1;x+=190){ctx.fillRect(x,y1-120,120,12);ctx.fillRect(x+32,y1-108,22,42);}
-  }
+  const id=(bm&&bm.id)||"dungeon",vw=viewW(),vh=viewH(),X=cam.x,Y=cam.y,sky=bdSky(id),N=sky.length;
+  ctx.imageSmoothingEnabled=false;
+  const bh=vh/N;for(let i=0;i<N;i++){ctx.fillStyle=sky[i];ctx.fillRect(X-6,Math.round(Y+i*bh)-1,vw+12,Math.ceil(bh)+2);}
+  for(let i=1;i<N;i++){const yy=Math.round(Y+i*bh);ctx.fillStyle=sky[i-1];for(let gx=0;gx<vw;gx+=8){if(((gx>>3)^i)&1)ctx.fillRect(X+gx,yy,4,4);}}
+  if(id==="heaven")drawHeavenPantheon(X,Y,vw,vh);
+  else if(id==="green")drawGreenVista(X,Y,vw,vh);
+  else if(id==="inferno")drawInfernoVista(X,Y,vw,vh);
+  else drawDungeonCrypt(X,Y,vw,vh);
 }
 function drawSky(){
   drawPixelBackdrop(curMap||getMap(G.map));
@@ -1027,18 +1079,12 @@ function drawRooms(bm){
     drawSky();
     const pats=bm.pats||[bm.pat],vx0=Math.max(0,cam.x),vy0=Math.max(0,cam.y),vx1=Math.min(WORLD.w,cam.x+viewW()),vy1=Math.min(WORLD.h,cam.y+viewH());
     if(vx1>vx0&&vy1>vy0){
-      ctx.fillStyle="#f8fbff";ctx.fillRect(vx0,vy0,vx1-vx0,vy1-vy0);
-      ctx.save();ctx.globalAlpha=.58;ctx.fillStyle=pats[0];ctx.fillRect(vx0,vy0,vx1-vx0,vy1-vy0);ctx.restore();
-      ctx.save();ctx.globalAlpha=.26;ctx.strokeStyle="#ffffff";ctx.lineWidth=6;ctx.strokeRect(24,24,WORLD.w-48,WORLD.h-48);
-      ctx.strokeStyle="#dfe7ee";ctx.lineWidth=3;ctx.strokeRect(58,58,WORLD.w-116,WORLD.h-116);
-      const slab=96;ctx.globalAlpha=.34;ctx.fillStyle="#ffffff";
-      for(let y=Math.floor(vy0/slab)*slab;y<vy1;y+=slab)for(let x=Math.floor(vx0/slab)*slab;x<vx1;x+=slab){ctx.fillRect(x+6,y+6,slab-12,4);ctx.fillRect(x+6,y+6,4,slab-12);}
-      ctx.globalAlpha=.26;ctx.fillStyle="#dce8f4";
-      for(let x=Math.floor(vx0/192)*192;x<vx1;x+=192)for(let y=Math.floor(vy0/192)*192;y<vy1;y+=192){ctx.fillRect(x+74,y+74,44,10);ctx.fillRect(x+90,y+58,10,44);}
-      const step=240;ctx.globalAlpha=.30;ctx.fillStyle="#ffffff";
-      for(let x=Math.floor(vx0/step)*step;x<vx1;x+=step){ctx.fillRect(x+34,vy0,14,vy1-vy0);ctx.fillRect(x+92,vy0,10,vy1-vy0);}
-      ctx.fillStyle="rgba(255,244,192,.24)";
-      for(let y=Math.floor(vy0/step)*step;y<vy1;y+=step){ctx.fillRect(vx0,y+46,vx1-vx0,10);ctx.fillRect(vx0,y+112,vx1-vx0,6);}
+      ctx.save();
+      ctx.globalAlpha=.20;ctx.fillStyle="#eef6ff";ctx.fillRect(vx0,vy0,vx1-vx0,vy1-vy0);
+      const slab=96;ctx.globalAlpha=.15;ctx.fillStyle="#ffffff";
+      for(let y=Math.floor(vy0/slab)*slab;y<vy1;y+=slab)for(let x=Math.floor(vx0/slab)*slab;x<vx1;x+=slab){ctx.fillRect(x+6,y+6,slab-12,3);ctx.fillRect(x+6,y+6,3,slab-12);}
+      ctx.globalAlpha=.13;ctx.fillStyle="#ffe9a8";
+      for(let y=Math.floor(vy0/slab)*slab;y<vy1;y+=slab)for(let x=Math.floor(vx0/slab)*slab;x<vx1;x+=slab)ctx.fillRect(x+slab/2-2,y+slab/2-2,4,4);
       ctx.restore();
     }
     return;
@@ -2423,12 +2469,8 @@ function render(){
   else if(groundPat){ctx.fillStyle=groundPat;ctx.fillRect(cam.x,cam.y,vw,vh);}
   else{ctx.fillStyle="#15110c";ctx.fillRect(cam.x,cam.y,vw,vh);}
   if(!bm.sky){
-    ctx.fillStyle=bm.void;
-    if(cam.x<0)ctx.fillRect(cam.x,cam.y,-cam.x,vh);
-    if(cam.y<0)ctx.fillRect(cam.x,cam.y,vw,-cam.y);
-    if(cam.x+vw>WORLD.w)ctx.fillRect(WORLD.w,cam.y,cam.x+vw-WORLD.w,vh);
-    if(cam.y+vh>WORLD.h)ctx.fillRect(cam.x,WORLD.h,vw,cam.y+vh-WORLD.h);
-    ctx.strokeStyle=bm.border;ctx.lineWidth=3;ctx.strokeRect(0,0,WORLD.w,WORLD.h);
+    // skybox (drawn in drawRooms) shows through the void/edges; just frame the playfield
+    ctx.strokeStyle=bm.border;ctx.lineWidth=4;ctx.strokeRect(0,0,WORLD.w,WORLD.h);
   }
   if(hero){const amb=ctx.createRadialGradient(hero.x,hero.y,40,hero.x,hero.y,540);amb.addColorStop(0,bm.amb);amb.addColorStop(1,"rgba(8,6,4,0)");ctx.fillStyle=amb;ctx.fillRect(cam.x,cam.y,vw,vh);}
   for(const o of obstacles){if(isVisibleWorld(o.x,o.y,120))drawProp(o);}
